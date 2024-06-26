@@ -57,7 +57,7 @@
             this.btn_save_doc.Font = new System.Drawing.Font("宋体", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.btn_save_doc.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(204)))), ((int)(((byte)(221)))), ((int)(((byte)(220)))));
             this.btn_save_doc.Location = new System.Drawing.Point(631, 591);
-            this.btn_save_doc.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.btn_save_doc.Margin = new System.Windows.Forms.Padding(2);
             this.btn_save_doc.Name = "btn_save_doc";
             this.btn_save_doc.Size = new System.Drawing.Size(131, 55);
             this.btn_save_doc.TabIndex = 5;
@@ -73,7 +73,7 @@
             this.btn_open_doc.Font = new System.Drawing.Font("宋体", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.btn_open_doc.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(204)))), ((int)(((byte)(221)))), ((int)(((byte)(220)))));
             this.btn_open_doc.Location = new System.Drawing.Point(477, 591);
-            this.btn_open_doc.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.btn_open_doc.Margin = new System.Windows.Forms.Padding(2);
             this.btn_open_doc.Name = "btn_open_doc";
             this.btn_open_doc.Size = new System.Drawing.Size(131, 55);
             this.btn_open_doc.TabIndex = 2;
@@ -89,7 +89,7 @@
             this.btn_return.Font = new System.Drawing.Font("宋体", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.btn_return.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(204)))), ((int)(((byte)(221)))), ((int)(((byte)(220)))));
             this.btn_return.Location = new System.Drawing.Point(785, 591);
-            this.btn_return.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.btn_return.Margin = new System.Windows.Forms.Padding(2);
             this.btn_return.Name = "btn_return";
             this.btn_return.Size = new System.Drawing.Size(131, 55);
             this.btn_return.TabIndex = 4;
@@ -105,7 +105,7 @@
             this.richTextBox1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(27)))), ((int)(((byte)(39)))), ((int)(((byte)(45)))));
             this.richTextBox1.ForeColor = System.Drawing.SystemColors.InactiveCaption;
             this.richTextBox1.Location = new System.Drawing.Point(53, 185);
-            this.richTextBox1.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.richTextBox1.Margin = new System.Windows.Forms.Padding(2);
             this.richTextBox1.Name = "richTextBox1";
             this.richTextBox1.Size = new System.Drawing.Size(876, 393);
             this.richTextBox1.TabIndex = 23;
@@ -189,7 +189,7 @@
             this.head_box.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
             this.head_box.Image = ((System.Drawing.Image)(resources.GetObject("head_box.Image")));
             this.head_box.Location = new System.Drawing.Point(1, 8);
-            this.head_box.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.head_box.Margin = new System.Windows.Forms.Padding(2);
             this.head_box.Name = "head_box";
             this.head_box.Size = new System.Drawing.Size(869, 44);
             this.head_box.TabIndex = 27;
@@ -202,7 +202,7 @@
             this.rpt_name.Font = new System.Drawing.Font("宋体", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.rpt_name.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(204)))), ((int)(((byte)(221)))), ((int)(((byte)(220)))));
             this.rpt_name.Location = new System.Drawing.Point(133, 85);
-            this.rpt_name.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.rpt_name.Margin = new System.Windows.Forms.Padding(2);
             this.rpt_name.Name = "rpt_name";
             this.rpt_name.Size = new System.Drawing.Size(323, 31);
             this.rpt_name.TabIndex = 38;
@@ -215,7 +215,7 @@
             this.plane_num.Font = new System.Drawing.Font("宋体", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.plane_num.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(204)))), ((int)(((byte)(221)))), ((int)(((byte)(220)))));
             this.plane_num.Location = new System.Drawing.Point(133, 131);
-            this.plane_num.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.plane_num.Margin = new System.Windows.Forms.Padding(2);
             this.plane_num.Name = "plane_num";
             this.plane_num.Size = new System.Drawing.Size(323, 31);
             this.plane_num.TabIndex = 39;
@@ -228,7 +228,7 @@
             this.opr_num.Font = new System.Drawing.Font("宋体", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.opr_num.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(204)))), ((int)(((byte)(221)))), ((int)(((byte)(220)))));
             this.opr_num.Location = new System.Drawing.Point(605, 131);
-            this.opr_num.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.opr_num.Margin = new System.Windows.Forms.Padding(2);
             this.opr_num.Name = "opr_num";
             this.opr_num.Size = new System.Drawing.Size(323, 31);
             this.opr_num.TabIndex = 40;
@@ -241,7 +241,7 @@
             this.end_time.Font = new System.Drawing.Font("宋体", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.end_time.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(204)))), ((int)(((byte)(221)))), ((int)(((byte)(220)))));
             this.end_time.Location = new System.Drawing.Point(777, 85);
-            this.end_time.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.end_time.Margin = new System.Windows.Forms.Padding(2);
             this.end_time.Name = "end_time";
             this.end_time.Size = new System.Drawing.Size(151, 31);
             this.end_time.TabIndex = 41;
@@ -254,7 +254,7 @@
             this.start_time.Font = new System.Drawing.Font("宋体", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.start_time.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(204)))), ((int)(((byte)(221)))), ((int)(((byte)(220)))));
             this.start_time.Location = new System.Drawing.Point(605, 85);
-            this.start_time.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.start_time.Margin = new System.Windows.Forms.Padding(2);
             this.start_time.Name = "start_time";
             this.start_time.Size = new System.Drawing.Size(147, 31);
             this.start_time.TabIndex = 42;
@@ -294,7 +294,7 @@
             this.Controls.Add(this.richTextBox1);
             this.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(204)))), ((int)(((byte)(221)))), ((int)(((byte)(220)))));
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.Fixed3D;
-            this.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.Margin = new System.Windows.Forms.Padding(2);
             this.Name = "History";
             ((System.ComponentModel.ISupportInitialize)(this.head_box)).EndInit();
             this.ResumeLayout(false);

@@ -320,7 +320,36 @@ public void SetIdInMainSys(int _ID)
         }
 
 
+        public bool GetAngle(string _sPntCol,string _sPntGroup,string _sPntName,ref double _dR,ref double _dTheta, ref double _dPhi)
+        {
+            //构建跟踪仪坐标系
+            string CurrentFrameCol = "";
+            string CurrentFrameName = "";
+            if (!m_Operator.GetWorkingFrameProperties(ref CurrentFrameCol,ref CurrentFrameName))
+            {
+                return false;
+            }
 
+            string frameName = "设备" + m_sCollectionName + InsID.ToString();
+            if (!m_Operator.ConstructFrameOnInstrumentBase(m_sCollectionName, InsID, frameName))
+            {
+                return false;
+            }
+
+            if (!m_Operator.SetWorkingFrame(m_sCollectionName, frameName))
+            {
+                return false;
+            }
+
+            if (!m_Operator.GetPointCoordinatePolar(_sPntCol, _sPntGroup, _sPntName, ref _dR, ref _dTheta, ref _dPhi))
+            {
+                return false;
+            }
+           
+
+
+            return true;
+        }
         //开启测量线程时用到
 
 

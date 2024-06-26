@@ -22,6 +22,7 @@ using MpLib;
 using NPOI.SS.UserModel;
 using NPOI.XSSF.UserModel;
 using iTextSharp.text.pdf;
+using System.Diagnostics;
 
 namespace WindowsFormsApp2
 {
@@ -35,10 +36,30 @@ namespace WindowsFormsApp2
         BindingList<Instrument> mInsList;
         BindingList<Instrument> mConnectedInsList;
         List<string> Ptnames = new List<string>();
+        List<string> points = new List<string>();
+        // 创建一个字典来存储PointData对象和它们的索引，以便快速查找
+        Dictionary<string, Tuple<Point_cloud, int>> pointDataDict = new Dictionary<string, Tuple<Point_cloud, int>>();
         //测量内容面板
         private Panel[] panels;
         private DataGridView[] dataGridViews;
         private string[] dataGridViewsName;
+        TableControl tableControl = new TableControl();
+        public enum CalculateMethod
+        {
+            Z_SUB_Z_DIV_X_SUB_X,
+            Z_SUB_Z,
+            Y_SUB_Y_DIV_X_SUB_X,
+            X,
+            Y,
+            Z,
+            X_SUB_X,
+            Y_SUB_Y,
+            Y_SUB_Y_DIV_2_SUB_Y,
+            NUM135500_SUB_Y,
+            NUM135500_SUB_Y_SUB_NUM135500_SUB_Y,
+            Z_SUB_Z_SUB_Z_SUB_Z,
+        }
+        private readonly IEnumerable<dynamic> measurements1, measurements2, measurements3, measurements4, measurements5, measurements6, measurements7, measurements8;
 
         public Plane(BindingList<Instrument> _mInsList, BindingList<Instrument> _mConnectedInsList)
         {
@@ -71,6 +92,130 @@ namespace WindowsFormsApp2
                 "腹鳍测量", "起落架测量", "起落架测量", "起落架测量", "起落架测量",
                 "起落架测量", "起落架测量", "外挂物挂架"
             };
+            measurements1 = new[]
+            {
+                //机身扭转角
+                new { DataGridView = dataGridView1, Pair = new[] { "2_L", "2B_L" }, Row = 1, Column = 1, CalculateMethod = CalculateMethod.Z_SUB_Z_DIV_X_SUB_X },
+                new { DataGridView = dataGridView1, Pair = new[] { "2_R", "2B_R" }, Row = 2, Column = 1, CalculateMethod = CalculateMethod.Z_SUB_Z_DIV_X_SUB_X },
+                //机身侧面倾角
+                new { DataGridView = dataGridView2, Pair = new[] { "7_L", "7B_L" }, Row = 1, Column = 1, CalculateMethod = CalculateMethod.Z_SUB_Z_DIV_X_SUB_X },
+                new { DataGridView = dataGridView2, Pair = new[] { "7_R", "7B_R" }, Row = 2, Column = 1, CalculateMethod = CalculateMethod.Z_SUB_Z_DIV_X_SUB_X },
+            };
+            measurements2 = new[]
+            {
+                //机翼安装角
+                new { DataGridView = dataGridView3, Pair = new[] { "11_L", "12_L" }, Row = 1, Column = 1, CalculateMethod = CalculateMethod.Z_SUB_Z },
+                new { DataGridView = dataGridView3, Pair = new[] { "12_L", "13_L" }, Row = 1, Column = 2, CalculateMethod = CalculateMethod.Z_SUB_Z },
+                new { DataGridView = dataGridView3, Pair = new[] { "12_L", "13A_L" }, Row = 1, Column = 3, CalculateMethod = CalculateMethod.Z_SUB_Z },
+                new { DataGridView = dataGridView3, Pair = new[] { "14_L", "15_L" }, Row = 1, Column = 4, CalculateMethod = CalculateMethod.Z_SUB_Z },
+                new { DataGridView = dataGridView3, Pair = new[] { "15_L", "16_L" }, Row = 1, Column = 5, CalculateMethod = CalculateMethod.Z_SUB_Z },
+                new { DataGridView = dataGridView3, Pair = new[] { "17_L", "18_L" }, Row = 1, Column = 6, CalculateMethod = CalculateMethod.Z_SUB_Z },
+                new { DataGridView = dataGridView3, Pair = new[] { "18_L", "19_L" }, Row = 1, Column = 7, CalculateMethod = CalculateMethod.Z_SUB_Z },
+                new { DataGridView = dataGridView3, Pair = new[] { "11_R", "12_R" }, Row = 2, Column = 1, CalculateMethod = CalculateMethod.Z_SUB_Z },
+                new { DataGridView = dataGridView3, Pair = new[] { "12_R", "13_R" }, Row = 2, Column = 2, CalculateMethod = CalculateMethod.Z_SUB_Z },
+                new { DataGridView = dataGridView3, Pair = new[] { "12_R", "13A_R" }, Row = 2, Column = 3, CalculateMethod = CalculateMethod.Z_SUB_Z },
+                new { DataGridView = dataGridView3, Pair = new[] { "14_R", "15_R" }, Row = 2, Column = 4, CalculateMethod = CalculateMethod.Z_SUB_Z },
+                new { DataGridView = dataGridView3, Pair = new[] { "15_R", "16_R" }, Row = 2, Column = 5, CalculateMethod = CalculateMethod.Z_SUB_Z },
+                new { DataGridView = dataGridView3, Pair = new[] { "17_R", "18_R" }, Row = 2, Column = 6, CalculateMethod = CalculateMethod.Z_SUB_Z },
+                new { DataGridView = dataGridView3, Pair = new[] { "18_R", "19_R" }, Row = 2, Column = 7, CalculateMethod = CalculateMethod.Z_SUB_Z },
+                new { DataGridView = dataGridView3, Pair = new[] { "11_L", "12_L", "11_R", "12_R" }, Row = 4, Column = 1, CalculateMethod = CalculateMethod.Z_SUB_Z_SUB_Z_SUB_Z },
+                new { DataGridView = dataGridView3, Pair = new[] { "12_L", "13_L", "12_R", "13_R" }, Row = 4, Column = 2, CalculateMethod = CalculateMethod.Z_SUB_Z_SUB_Z_SUB_Z },
+                new { DataGridView = dataGridView3, Pair = new[] { "12_L", "13A_L", "12_R", "13A_R" }, Row = 4, Column = 3, CalculateMethod = CalculateMethod.Z_SUB_Z_SUB_Z_SUB_Z },
+                new { DataGridView = dataGridView3, Pair = new[] { "14_L", "15_L", "14_R", "15_R" }, Row = 4, Column = 4, CalculateMethod = CalculateMethod.Z_SUB_Z_SUB_Z_SUB_Z },
+                new { DataGridView = dataGridView3, Pair = new[] { "15_L", "16_L", "15_R", "16_R" }, Row = 4, Column = 5, CalculateMethod = CalculateMethod.Z_SUB_Z_SUB_Z_SUB_Z },
+                new { DataGridView = dataGridView3, Pair = new[] { "17_L", "18_L", "17_R", "18_R" }, Row = 4, Column = 6, CalculateMethod = CalculateMethod.Z_SUB_Z_SUB_Z_SUB_Z },
+                new { DataGridView = dataGridView3, Pair = new[] { "18_L", "19_L", "18_R", "19_R" }, Row = 4, Column = 7, CalculateMethod = CalculateMethod.Z_SUB_Z_SUB_Z_SUB_Z },
+                //机翼安装角
+                new { DataGridView = dataGridView4, Pair = new[] { "13_L", "18_L" }, Row = 1, Column = 1, CalculateMethod = CalculateMethod.Z_SUB_Z },
+                new { DataGridView = dataGridView4, Pair = new[] { "13_R", "18_R" }, Row = 2, Column = 1, CalculateMethod = CalculateMethod.Z_SUB_Z },
+                new { DataGridView = dataGridView4, Pair = new[] { "13_L", "18_L", "13_R", "18_R" }, Row = 4, Column = 1, CalculateMethod = CalculateMethod.Z_SUB_Z_SUB_Z_SUB_Z },
+                //机翼前缘后掠角
+                new { DataGridView = dataGridView5, Pair = new[] { "17_L", "11A_L" }, Row = 1, Column = 1, CalculateMethod = CalculateMethod.Y_SUB_Y_DIV_X_SUB_X },
+                new { DataGridView = dataGridView5, Pair = new[] { "17_R", "11A_R" }, Row = 2, Column = 1, CalculateMethod = CalculateMethod.Y_SUB_Y_DIV_X_SUB_X },
+                //机翼定位精度
+                new { DataGridView = dataGridView6, Pair = new[] { "15_L" }, Row = 1, Column = 1, CalculateMethod = CalculateMethod.X },
+                new { DataGridView = dataGridView6, Pair = new[] { "15_R" }, Row = 2, Column = 1, CalculateMethod = CalculateMethod.X },
+                new { DataGridView = dataGridView6, Pair = new[] { "15_L" }, Row = 1, Column = 2, CalculateMethod = CalculateMethod.Y },
+                new { DataGridView = dataGridView6, Pair = new[] { "15_R" }, Row = 2, Column = 2, CalculateMethod = CalculateMethod.Y },
+                new { DataGridView = dataGridView6, Pair = new[] { "15_L", "15_R" }, Row = 4, Column = 1, CalculateMethod = CalculateMethod.X_SUB_X },
+                new { DataGridView = dataGridView6, Pair = new[] { "15_L", "15_R" }, Row = 4, Column = 2, CalculateMethod = CalculateMethod.Y_SUB_Y },
+            };
+            measurements3 = new[]
+            {
+                //鸭翼安装角
+                new { DataGridView = dataGridView7, Pair = new[] { "21_L", "22_L" }, Row = 1, Column = 1, CalculateMethod = CalculateMethod.Z_SUB_Z },
+                new { DataGridView = dataGridView7, Pair = new[] { "21_L", "23_L" }, Row = 1, Column = 2, CalculateMethod = CalculateMethod.Z_SUB_Z },
+                new { DataGridView = dataGridView7, Pair = new[] { "24_L", "25_L" }, Row = 1, Column = 3, CalculateMethod = CalculateMethod.Z_SUB_Z },
+                new { DataGridView = dataGridView7, Pair = new[] { "21_R", "22_R" }, Row = 2, Column = 1, CalculateMethod = CalculateMethod.Z_SUB_Z },
+                new { DataGridView = dataGridView7, Pair = new[] { "21_R", "23_R" }, Row = 2, Column = 2, CalculateMethod = CalculateMethod.Z_SUB_Z },
+                new { DataGridView = dataGridView7, Pair = new[] { "24_R", "25_R" }, Row = 2, Column = 3, CalculateMethod = CalculateMethod.Z_SUB_Z },
+                //鸭翼上反角
+                new { DataGridView = dataGridView8, Pair = new[] { "24_L", "22_L" }, Row = 1, Column = 1, CalculateMethod = CalculateMethod.Z_SUB_Z },
+                new { DataGridView = dataGridView8, Pair = new[] { "24_R", "22_R" }, Row = 2, Column = 1, CalculateMethod = CalculateMethod.Z_SUB_Z },
+                new { DataGridView = dataGridView8, Pair = new[] { "24_L", "22_L", "24_R", "22_R" }, Row = 4, Column = 1, CalculateMethod = CalculateMethod.Z_SUB_Z_SUB_Z_SUB_Z },
+                //鸭翼定位精度
+                new { DataGridView = dataGridView9, Pair = new[] { "22_L" }, Row = 1, Column = 1, CalculateMethod = CalculateMethod.Z },
+                new { DataGridView = dataGridView9, Pair = new[] { "22_R" }, Row = 2, Column = 1, CalculateMethod = CalculateMethod.Z },
+                new { DataGridView = dataGridView9, Pair = new[] { "22_L", "22_R" }, Row = 4, Column = 1, CalculateMethod = CalculateMethod.Z_SUB_Z },
+                new { DataGridView = dataGridView9, Pair = new[] { "22_L" }, Row = 1, Column = 2, CalculateMethod = CalculateMethod.Y },
+                new { DataGridView = dataGridView9, Pair = new[] { "22_R" }, Row = 2, Column = 2, CalculateMethod = CalculateMethod.Y },
+                new { DataGridView = dataGridView9, Pair = new[] { "22_L", "22_R" }, Row = 4, Column = 2, CalculateMethod = CalculateMethod.Y_SUB_Y },
+            };
+            measurements4 = new[]
+            {
+                //垂尾安装角
+                new { DataGridView = dataGridView10, Pair = new[] { "31_L", "33_L" }, Row = 1, Column = 1, CalculateMethod = CalculateMethod.X_SUB_X },
+                new { DataGridView = dataGridView10, Pair = new[] { "32_L", "33_L" }, Row = 1, Column = 2, CalculateMethod = CalculateMethod.X_SUB_X },
+                new { DataGridView = dataGridView10, Pair = new[] { "34_L", "36_L" }, Row = 1, Column = 3, CalculateMethod = CalculateMethod.X_SUB_X },
+                new { DataGridView = dataGridView10, Pair = new[] { "35_L", "36_L" }, Row = 1, Column = 4, CalculateMethod = CalculateMethod.X_SUB_X },
+                new { DataGridView = dataGridView10, Pair = new[] { "31_R", "33_R" }, Row = 2, Column = 1, CalculateMethod = CalculateMethod.X_SUB_X },
+                new { DataGridView = dataGridView10, Pair = new[] { "32_R", "33_R" }, Row = 2, Column = 2, CalculateMethod = CalculateMethod.X_SUB_X },
+                new { DataGridView = dataGridView10, Pair = new[] { "34_R", "36_R" }, Row = 2, Column = 3, CalculateMethod = CalculateMethod.X_SUB_X },
+                new { DataGridView = dataGridView10, Pair = new[] { "35_R", "36_R" }, Row = 2, Column = 4, CalculateMethod = CalculateMethod.X_SUB_X },
+                //垂尾倾斜角
+                new { DataGridView = dataGridView11, Pair = new[] { "34_L", "32_L" }, Row = 1, Column = 1, CalculateMethod = CalculateMethod.Z_SUB_Z_DIV_X_SUB_X },
+                new { DataGridView = dataGridView11, Pair = new[] { "34_R", "32_R" }, Row = 2, Column = 1, CalculateMethod = CalculateMethod.Z_SUB_Z_DIV_X_SUB_X },
+                //垂尾定位精度
+                new { DataGridView = dataGridView12, Pair = new[] { "32_L" }, Row = 1, Column = 1, CalculateMethod = CalculateMethod.X },
+                new { DataGridView = dataGridView12, Pair = new[] { "32_R" }, Row = 2, Column = 1, CalculateMethod = CalculateMethod.X },
+                new { DataGridView = dataGridView12, Pair = new[] { "32_L" }, Row = 1, Column = 2, CalculateMethod = CalculateMethod.Y },
+                new { DataGridView = dataGridView12, Pair = new[] { "32_R" }, Row = 2, Column = 2, CalculateMethod = CalculateMethod.Y },
+                new { DataGridView = dataGridView12, Pair = new[] { "32_L", "32_R" }, Row = 4, Column = 1, CalculateMethod = CalculateMethod.X_SUB_X },
+                new { DataGridView = dataGridView12, Pair = new[] { "32_L", "32_R" }, Row = 4, Column = 2, CalculateMethod = CalculateMethod.Y_SUB_Y },
+            };
+            measurements5 = new[]
+            {
+                //腹鳍安装角
+                new { DataGridView = dataGridView15, Pair = new[] { "43_L", "41_L" }, Row = 1, Column = 1, CalculateMethod = CalculateMethod.X_SUB_X },
+                new { DataGridView = dataGridView15, Pair = new[] { "43_R", "41_R" }, Row = 2, Column = 1, CalculateMethod = CalculateMethod.X_SUB_X },
+                //腹鳍倾斜角
+                new { DataGridView = dataGridView16, Pair = new[] { "43_L", "42_L" }, Row = 1, Column = 1, CalculateMethod = CalculateMethod.X_SUB_X },
+                new { DataGridView = dataGridView16, Pair = new[] { "43_R", "42_R" }, Row = 2, Column = 1, CalculateMethod = CalculateMethod.X_SUB_X },
+                new { DataGridView = dataGridView16, Pair = new[] { "42_L", "43_L" }, Row = 1, Column = 2, CalculateMethod = CalculateMethod.Z_SUB_Z },
+                new { DataGridView = dataGridView16, Pair = new[] { "42_R", "43_R" }, Row = 2, Column = 2, CalculateMethod = CalculateMethod.Z_SUB_Z },
+            };
+            measurements6 = new[]
+            {
+                //前主轮距
+                new { DataGridView = dataGridView17, Pair = new[] { "0_L", "0_R", "0_F" }, Row = 1, Column = 2, CalculateMethod = CalculateMethod.Y_SUB_Y_DIV_2_SUB_Y },
+                //第13550框轴至主轮距离
+                new { DataGridView = dataGridView18, Pair = new[] { "0_L" }, Row = 1, Column = 1, CalculateMethod = CalculateMethod.NUM135500_SUB_Y },
+                new { DataGridView = dataGridView18, Pair = new[] { "0_R" }, Row = 2, Column = 1, CalculateMethod = CalculateMethod.NUM135500_SUB_Y },
+                new { DataGridView = dataGridView18, Pair = new[] { "0_L", "0_R" }, Row = 4, Column = 1, CalculateMethod = CalculateMethod.NUM135500_SUB_Y_SUB_NUM135500_SUB_Y },
+                //横向主轮距
+                new { DataGridView = dataGridView19, Pair = new[] { "0_L", "0_R" }, Row = 2, Column = 1, CalculateMethod = CalculateMethod.X_SUB_X },
+                //主轮倾角
+                //前轮对称性
+            };
+            measurements7 = new[]
+            {
+                new { DataGridView = dataGridView23, Pair = new[] { "62", "61" }, Row = 1, Column = 1, CalculateMethod = CalculateMethod.Z_SUB_Z },
+                new { DataGridView = dataGridView23, Pair = new[] { "62", "61" }, Row = 3, Column = 1, CalculateMethod = CalculateMethod.Z_SUB_Z },
+                new { DataGridView = dataGridView23, Pair = new[] { "61" }, Row = 1, Column = 2, CalculateMethod = CalculateMethod.X },
+                new { DataGridView = dataGridView23, Pair = new[] { "61" }, Row = 3, Column = 2, CalculateMethod = CalculateMethod.X },
+                new { DataGridView = dataGridView23, Pair = new[] { "62", "61" }, Row = 1, Column = 3, CalculateMethod = CalculateMethod.X },
+                new { DataGridView = dataGridView23, Pair = new[] { "62", "61" }, Row = 3, Column = 3, CalculateMethod = CalculateMethod.X_SUB_X },
+            };
         }
         private void btn_import_plane_std_Click(object sender, EventArgs e)
         {
@@ -82,25 +227,41 @@ namespace WindowsFormsApp2
             }
             else return;
 
-            string[] ptdata = File.ReadAllLines(fileName);
+            
 
-            // 将PointData列表绑定到DataGridView的数据源
-            for (int i = 0; i < ptdata.Length; i++)
+            //向SA中导入预定义格式的ACSII的txt文件
+            if (!mpObj.ImportASCII(fileName, "点名 X Y Z", "毫米", "A", "飞机理论点"))
             {
-                string strs = ptdata[i].ToString();
-                string name = strs.Split(' ')[0];
-                Vector3 vector = new Vector3(StrToFloat(strs.Split(' ')[1]), StrToFloat(strs.Split(' ')[2]), StrToFloat(strs.Split(' ')[3]));
-                Ptnames.Add(name);
-                pointDataList.Add(new Point_cloud(name, vector, zeros));
-
-                paint.Add(new Vector2(5*i,5*i));//测试用
+                MessageBox.Show("导入" + fileName + " 文件失败！");
             }
-            dataGridView_plane.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            else
+            {
+                string[] ptdata = File.ReadAllLines(fileName);
+
+                // 将PointData列表绑定到DataGridView的数据源
+                for (int i = 0; i < ptdata.Length; i++)
+                {
+                    string strs = ptdata[i].ToString();
+                    string name = strs.Split(' ')[0];
+                    Vector3 vector = new Vector3(StrToFloat(strs.Split(' ')[1]), StrToFloat(strs.Split(' ')[2]), StrToFloat(strs.Split(' ')[3]));
+                    Ptnames.Add(name);
+                    pointDataList.Add(new Point_cloud(name, vector, zeros));
+
+                    paint.Add(new Vector2(5 * i, 5 * i));//测试用
+                }
+                dataGridView_plane.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+                dataGridView_plane.DataSource = pointDataList;
+                dataGridView_plane.Refresh();
+
+                // 填充字典，同时记录索引
+                for (int i = 0; i < pointDataList.Count; i++)
+                {
+                    pointDataDict[pointDataList[i].ptname] = new Tuple<Point_cloud, int>(pointDataList[i], i);
+                }
+                dataGridView_plane.Refresh();
+            }
 
 
-            dataGridView_plane.DataSource = pointDataList;
-            dataGridView_plane.AllowUserToAddRows = false;
-            dataGridView_plane.Refresh();
 
         }
         public float StrToFloat(object FloatString)
@@ -414,7 +575,10 @@ namespace WindowsFormsApp2
         private void btn_plane_devloc_Click(object sender, EventArgs e)
         {
             Locate locate = new Locate(mInsList, mConnectedInsList);
+            locate.ShowDialog();
+            
         }
+
 
         private void dataGridView_plane_CellClick(object sender, DataGridViewCellEventArgs e)
         {
@@ -437,9 +601,55 @@ namespace WindowsFormsApp2
             // 将新的 Bitmap 设置为 pictureBox_sp1 的 Image 属性
             pictureBox_sp1.Image = newImage;
 
+
             // 指点测量
             Vector3 vec = (Vector3)dataGridView_plane.Rows[e.RowIndex].Cells[1].Value;
-            MessageBox.Show(vec.ToString());
+            string _name = dataGridView_plane.Rows[e.RowIndex].Cells[0].Value.ToString();
+            if (null == mpObj)
+            {
+                MessageBox.Show("未连接仪器！");
+                return;
+            }
+            //获取需要连接的仪器ID
+            int InsIDToConnect = 0;
+
+            //测量数据
+            //double x = 0, y = 0, z = 0;
+
+            if (mInsList.Count() > InsIDToConnect)
+            {
+                if (mInsList.ElementAt(InsIDToConnect).Connected)
+                {
+                    mInsList.ElementAt(InsIDToConnect).PointAtTarget("A::飞机理论点::" + _name);
+                }
+                //获取设备旋转角
+                string PntCol = "A";
+                string PntGroup = "飞机理论点";
+                string Pntname = _name;
+
+                double r = 0;
+                double theta = 0;
+                double phi = 0;
+                Instrument selectedIns = (Instrument)plane_devselect.SelectedItem;
+                selectedIns.GetAngle(PntCol, PntGroup, Pntname, ref r, ref theta, ref phi);
+                ////删除坐标系
+                //string colName = "";
+                //string ObjName = "";
+                //mpObj.MakeACollectionObjectNameFromStrings("A", "设备A"+InsIDToConnect.ToString(), "Frame", ref colName, ref ObjName);
+
+                //object ObjList = null;
+                //mpObj.AddACollectionObjectNameToARefList("设备A0", colName, ObjName, ref ObjList);
+                //mpObj.DeleteObjects(ref ObjList);
+
+                tableControl.TableCon(theta,phi,r);
+                mpObj.SetWorkingFrame("A","World");
+
+
+            }
+            else
+            {
+                MessageBox.Show("仪器号码过大，系统中没有添加该仪器！");
+            }
 
 
         }
@@ -452,11 +662,7 @@ namespace WindowsFormsApp2
                 return;
             }
             //获取需要连接的仪器ID
-            int InsIDToConnect = 0;
-
-            //获取需要连接的仪器ID
-            //DataGridViewRow selectedRow = dataGridView_plane.CurrentRow;
-            //DataTable dt = ((DataTable)dataGridView_plane.DataSource)[selectedRow.Index];
+            int InsIDToConnect = plane_devselect.SelectedIndex;
 
             //测量数据
             double x = 0, y = 0, z = 0;
@@ -479,7 +685,9 @@ namespace WindowsFormsApp2
                         MessageBox.Show("测量全机" + Ptnames[ind] + "成功！");
                         mpObj.GetPointCoordinate("A", "全机", Ptnames[ind], ref x, ref y, ref z);
                         //TODO：把点信息显示到界面上
-                        pointDataList[ind].Set_mean((float)x, (float)y, (float)z);
+                        //pointDataList[ind].Set_mean((float)x, (float)y, (float)z);
+                        dataGridView_plane.Rows[ind].Cells[2].Value = new Vector3((float)x,(float)y,(float)z);
+                        //dataGridView_plane.Refresh();
                     }
                     else
                     {
@@ -494,21 +702,235 @@ namespace WindowsFormsApp2
             }
         }
 
-        private int GetSelectedRowIndex(DataGridView dgv)
+        private void dataGridView_plane_CellValueChanged(object sender, DataGridViewCellEventArgs e)
         {
-            if (dgv.Rows.Count == 0)
-            {
-                return 0;
-            }
-            foreach (DataGridViewRow row in dgv.Rows)
-            {
-                if (row.Selected)
-                {
-                    return row.Index;
-                }
-            }
-            return 0;
+            deal_CellValueChange(e.RowIndex);
         }
+        private void deal_CellValueChange(int index)
+        {
+            string ptname = pointDataList[index].ptname;
+
+            switch (ptname)
+            {
+                case "2_L":
+                case "2B_L":
+                case "2_R":
+                case "2B_R":
+                case "7_L":
+                case "7B_L":
+                case "7_R":
+                case "7B_R":
+                    all_calculation(measurements1);
+                    break;
+                case "11":
+                case "11_R":
+                case "11A_L":
+                case "11A_R":
+                case "12_L":
+                case "12_R":
+                case "13_L":
+                case "13_R":
+                case "13A_L":
+                case "13A_R":
+                case "14_L":
+                case "14_R":
+                case "15_L":
+                case "15_R":
+                case "16_L":
+                case "16_R":
+                case "17_L":
+                case "17_R":
+                case "18_L":
+                case "18_R":
+                case "19_L":
+                case "19_R":
+                    all_calculation(measurements2);
+                    break;
+                case "21_L":
+                case "21_R":
+                case "22_L":
+                case "22_R":
+                case "23_L":
+                case "23_R":
+                case "24_L":
+                case "24_R":
+                case "25_L":
+                case "25_R":
+                    all_calculation(measurements3);
+                    break;
+                case "31_L":
+                case "31_R":
+                case "32_L":
+                case "32_R":
+                case "33_L":
+                case "33_R":
+                case "34_L":
+                case "34_R":
+                case "35_L":
+                case "35_R":
+                case "36_L":
+                case "36_R":
+                    all_calculation(measurements4);
+                    break;
+                case "41_L":
+                case "41_R":
+                case "42_L":
+                case "42_R":
+                case "43_L":
+                case "43_R":
+                    all_calculation(measurements5);
+                    break;
+                case "53_L":
+                case "53_R":
+                case "53A_L":
+                case "53A_R":
+                case "54_L":
+                case "54_R":
+                case "54A_L":
+                case "54A_R":
+                case "51_L":
+                case "51_R":
+                case "52_L":
+                case "52_R":
+                case "55_L":
+                case "55_R":
+                case "53B_L":
+                case "53B_R":
+                case "54B_L":
+                case "54B_R":
+                    //all_calculation(measurements6);
+                    break;
+                case "O_L":
+                case "O_R":
+                case "O_F":
+                    all_calculation(measurements6);
+                    break;
+                case "61_L":
+                case "61_R":
+                case "62_L":
+                case "62_R":
+                    all_calculation(measurements7);
+                    break;
+                default:
+                    break;
+            }
+        }
+        //测量值计算
+        private void all_calculation(IEnumerable<dynamic> measurements)
+        {
+            foreach (var measurement in measurements)
+            {
+                //MessageBox.Show("1111111");
+                points.Clear();
+                points.AddRange(measurement.Pair);
+                Calculate(points, measurement.CalculateMethod, measurement.Row, measurement.Column, measurement.DataGridView);
+            }
+        }
+
+        private int get_ptname_index(string ptname)
+        {
+
+            if (pointDataDict.TryGetValue(ptname, out Tuple<Point_cloud, int> result))
+            {
+                return result.Item2;
+            }
+            // ptname不存在于字典中
+            return -1;
+        }
+        //测量公式,调用需要确保参数有效
+        private void Calculate(List<string> pointNames, CalculateMethod method, int rowIndex, int columnIndex, DataGridView dataGridView)
+        {
+            //Debug.WriteLine("into___________calculate");
+
+            if (pointNames.Count > 4 || rowIndex < 0 || columnIndex < 0)
+            {
+                //MessageBox.Show("算不出来");
+                return;
+            }
+            Vector3[] points = new Vector3[pointNames.Count];
+            float result = 0;
+
+            //根据字典保存的索引取对应的vector3
+            for (int i = 0; i < pointNames.Count; i++)
+            {
+                int index = get_ptname_index(pointNames.ElementAt(i));
+                if (index < 0)
+                {
+                    //MessageBox.Show("qqqqq"); 
+                    return;
+                } 
+                //MessageBox.Show("hhhhh");
+                points[i] = pointDataList[index].mean;
+            }
+            //Debug.WriteLine("into___________point");
+            switch (method)
+            {
+                case CalculateMethod.Z_SUB_Z_DIV_X_SUB_X:
+                    {
+                        if ((points[0].X - points[1].X) == 0) break;
+                        else
+                        {
+                            result = (points[0].Z - points[1].Z) / (points[0].X - points[1].X);
+                            break;
+                        }
+                    }
+                    
+                case CalculateMethod.Z_SUB_Z:
+                    result = (points[0].Z - points[1].Z);
+                    break;
+                case CalculateMethod.Y_SUB_Y_DIV_X_SUB_X:
+                    {
+                        if ((points[0].X - points[1].X) == 0) break;
+                        else
+                        {
+                            result = (points[0].Y - points[1].Y) / (points[0].X - points[1].X);
+                            break;
+                        }
+                    }
+                    
+                case CalculateMethod.X:
+                    result = points[0].X;
+                    break;
+                case CalculateMethod.Y:
+                    result = points[0].Y;
+                    break;
+                case CalculateMethod.Z:
+                    result = points[0].Z;
+                    break;
+                case CalculateMethod.X_SUB_X:
+                    result = (points[0].X - points[1].X);
+                    break;
+                case CalculateMethod.Y_SUB_Y:
+                    result = (points[0].Y - points[1].Y);
+                    break;
+                case CalculateMethod.Y_SUB_Y_DIV_2_SUB_Y:
+                    {
+                        if ((2 - points[2].Y) == 0) break;
+                        else
+                        {
+                            result = (points[0].Y - points[1].Y) / (2 - points[2].Y);
+                            break;
+                        }
+                    }
+                    
+                case CalculateMethod.NUM135500_SUB_Y:
+                    result = (135500 - points[0].Y);
+                    break;
+                case CalculateMethod.NUM135500_SUB_Y_SUB_NUM135500_SUB_Y:
+                    result = (135500 - points[0].Y) - (135500 - points[1].Y);
+                    break;
+                case CalculateMethod.Z_SUB_Z_SUB_Z_SUB_Z:
+                    result = (points[0].Z - points[1].Z) - (points[2].Z - points[3].Z);
+                    break;
+                default:
+                    break;
+            }
+            //Debug.WriteLine("into___________calculate after");
+            dataGridView.Rows[rowIndex].Cells[columnIndex].Value = result.ToString();
+            //MessageBox.Show("/////" + result.ToString());
+
+        }
+
 
     }
 }

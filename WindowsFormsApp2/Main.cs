@@ -27,6 +27,10 @@ using System.Runtime.InteropServices;
 using PointCloud;
 using System.Numerics;
 using System.IO.Ports;
+using MathNet.Numerics.LinearAlgebra;
+using iTextSharp.text;
+using SixLabors.ImageSharp;
+using System.Diagnostics;
 
 namespace WindowsFormsApp2
 {
@@ -40,56 +44,45 @@ namespace WindowsFormsApp2
         private VideoCapture capture;
         public string step_textpath = Environment.CurrentDirectory.Replace("\\bin\\Debug", "") + "/operate_schedule/";
         private bool fullScreenFlag1 = false;
-
-        public SerialPort serialPort1 = new SerialPort();
-
+        string Pts_plane_loc;//构建飞机坐标系的理论点组名
+        public List<Point_cloud> pointDataList_PF = new List<Point_cloud> { };
+        public List<Point_cloud> pointDataList_GND = new List<Point_cloud> { };
+        Vector3 zeros = new Vector3((float)0.0, (float)0.0, (float)0.0);
         Myexcel myexcel = new Myexcel();
+        TableControl tableControl = new TableControl();
+        private int index_gnd = 0;
+        private int num_gnd = 6;
+
+
+        //相机画面参数
+        private System.Drawing.Size pic_size;
+
         public Main()
         {
             InitializeComponent();
-
-            //mInsList.AllowNew = true; // 允许添加新项
-            //mInsList.AllowEdit = true; // 允许编辑项
-            //mInsList.AllowRemove = true; // 允许删除
-
-            //People p = this.bindingSource1.DataSource as People;
-            //this.tbName.DataBindings.Add(nameof(this.tbName.Text), this.bindingSource1, nameof(p.Name));
-            //this.tbAge.DataBindings.Add(nameof(this.tbAge.Text), this.bindingSource1, nameof(p.Age), true, DataSourceUpdateMode.OnValidation);
-            //this.errorProvider1.DataSource = this.bindingSource1;
-            //dataGridView_dev.DataSource = mInsList;
-            //mInsList.DataBind();
-
-            //WindowState = FormWindowState.Maximized;
-
+            WindowState = FormWindowState.Maximized;
             mInsList = new BindingList<Instrument>();
             mConnectedInsList = new BindingList<Instrument>();
-
             //数据绑定
-            //BindingList <Instrument> bList  = new BindingList<Instrument>(mInsList);
             dataGridView_dev.DataSource = mInsList;
-            combSelTracker.DataSource = mConnectedInsList;
-            combSelTracker.DisplayMember = "Name";
-            combSelTracker.ValueMember = "InsID";
 
-            comboBox_loc_dev_select.DataSource = mConnectedInsList;
-            comboBox_loc_dev_select.DisplayMember = "Name";
-            comboBox_loc_dev_select.ValueMember = "InsID";
+            combox_planeFrame.DataSource = mConnectedInsList;
+            combox_planeFrame.DisplayMember = "Name";
+            combox_planeFrame.ValueMember = "InsID";
 
-            conv_dev_select.DataSource = mConnectedInsList;
-            conv_dev_select.DisplayMember = "Name";
-            conv_dev_select.ValueMember = "InsID";
+            comboBox_gnd.DataSource = mConnectedInsList;
+            comboBox_gnd.DisplayMember = "Name";
+            comboBox_gnd.ValueMember = "InsID";
 
-            plane_devselect.DataSource = mConnectedInsList;
-            plane_devselect.DisplayMember = "Name";
-            plane_devselect.ValueMember = "InsID";
+
             mean_process.Text = info.doc_text;
-            //create_tables();
-            dgv_DoubleBuffer_init();
 
+            Process.Start(@"E:\table\USR-VCOM.exe");  //直接调用打开文件
 
         }
-        //地面基准坐标系原点测量
-        private void btn_o_Click(object sender, EventArgs e)
+
+        //飞机基准点测量
+        private void btn_plane_Click(object sender, EventArgs e)
         {
             if (null == mpObj)
             {
@@ -98,25 +91,32 @@ namespace WindowsFormsApp2
             }
             //获取需要连接的仪器ID
             int InsIDToConnect = 0;
+            double x = 0, y = 0, z = 0;
+            string groupName = text_pf_mean.Text.Split(':')[2];
 
             if (mInsList.Count() > InsIDToConnect)
             {
                 if (mInsList.ElementAt(InsIDToConnect).Connected)
                 {
-                    //如果已经有原点，删除原点
-                    string[] listPntToDelete = new string[1];
-                    listPntToDelete[0] = "A::坐标系::原点";
+                    //如果已经有点，删除点
+                    string[] listPntToDelete = new string[2];
+                    int index = dataGridView_PF.CurrentRow.Index;
+                    listPntToDelete[0] = "A::" + groupName + "::" + pointDataList_PF[index].ptname;
                     mpObj.DeletePoints(listPntToDelete);
 
                     //测试
-                    if (mInsList.ElementAt(InsIDToConnect).MeasureSinglePnt("A::坐标系::原点"))
+                    if (mInsList.ElementAt(InsIDToConnect).MeasureSinglePnt("A::" + groupName + "::" + pointDataList_PF[index].ptname))
                     {
-                        MessageBox.Show("测量原点成功！");
+                        MessageBox.Show("测量" + groupName + "::" + pointDataList_PF[index].ptname + "成功！");
                         //TODO：把点信息显示到界面上
+                        mpObj.GetPointCoordinate("A", groupName, pointDataList_PF[index].ptname, ref x, ref y, ref z);
+                        //TODO：把点信息显示到界面上
+                        //pointDataList_PF[index].Set_mean((float)x, (float)y, (float)z
+                        dataGridView_PF.Rows[index].Cells[2].Value = new Vector3((float)x, (float)y, (float)z);
                     }
                     else
                     {
-                        MessageBox.Show("测量原点失败！");
+                        MessageBox.Show("测量" + groupName + "::" + pointDataList_PF[index].ptname + "失败！");
                     }
                 }
 
@@ -126,82 +126,6 @@ namespace WindowsFormsApp2
                 MessageBox.Show("仪器号码过大，系统中没有添加该仪器！");
             }
 
-        }
-    
-        //地面基准坐标系X轴方向点测量
-        private void btn_x_Click(object sender, EventArgs e)
-        {
-            if (null == mpObj)
-            {
-                MessageBox.Show("未连接仪器！");
-                return;
-            }
-            //获取需要连接的仪器ID
-            int InsIDToConnect = 0;
-
-            if (mInsList.Count() > InsIDToConnect)
-            {
-                if (mInsList.ElementAt(InsIDToConnect).Connected)
-                {
-                    //如果已经有原点，删除原点
-                    string[] listPntToDelete = new string[1];
-                    listPntToDelete[0] = "A::坐标系::X";
-                    mpObj.DeletePoints(listPntToDelete);
-                    //测试
-                    if (mInsList.ElementAt(InsIDToConnect).MeasureSinglePnt("A::坐标系::X"))
-                    {
-                        MessageBox.Show("测量X成功！");
-                        //TODO：把点信息显示到界面上
-                    }
-                    else
-                    {
-                        MessageBox.Show("测量X失败！");
-                    }
-                }
-
-            }
-            else
-            {
-                MessageBox.Show("仪器号码过大，系统中没有添加该仪器！");
-            }
-
-        }
-        //地面基准坐标系Y轴方向点测量
-        private void btn_y_Click(object sender, EventArgs e)
-        {
-            if (null == mpObj)
-            {
-                MessageBox.Show("未连接仪器！");
-                return;
-            }
-            //获取需要连接的仪器ID
-            int InsIDToConnect = 0;
-
-            if (mInsList.Count() > InsIDToConnect)
-            {
-                if (mInsList.ElementAt(InsIDToConnect).Connected)
-                {
-                    //如果已经有原点，删除原点
-                    string[] listPntToDelete = new string[1];
-                    listPntToDelete[0] = "A::坐标系::Y";
-                    mpObj.DeletePoints(listPntToDelete);
-                    //测试
-                    if (mInsList.ElementAt(InsIDToConnect).MeasureSinglePnt("A::坐标系::Y"))
-                    {
-                        MessageBox.Show("测量Y成功！");
-                        //TODO：把点信息显示到界面上
-                    }
-                    else
-                    {
-                        MessageBox.Show("测量Y失败！");
-                    }
-                }
-
-            }
-            else
-            {
-                MessageBox.Show("仪器号码过大，系统中没有添加该仪器！");
-            }
         }
 
 
@@ -227,38 +151,21 @@ namespace WindowsFormsApp2
             stime = System.DateTime.Now.ToString("yyyy_MM_dd_HH：mm：ss");
             log += mean_process.Text + "\n";
             mean_process.Clear();
-            //string text_path = @"F:\\C#_proj\\airplane_meansure_app_0416\\WindowsFormsApp2\\operate_schedule\\设备连接.txt";
             string text_path = step_textpath + "/设备连接.txt";
             string text_strs = ReadTxtContent(text_path);
             mean_process.Text = text_strs;
         }
 
-        //左侧按键触发-仪器定位
-        private void btn_gnd_meansure_Click(object sender, EventArgs e)
-        {
-            tabcontrol_main.SelectedTab = page_gnd;
-            stime = System.DateTime.Now.ToString("yyyy_MM_dd_HH：mm：ss");
-            log += mean_process.Text + "\n";
-            mean_process.Clear();
-            //string text_path = @"F:\\C#_proj\\airplane_meansure_app_0416\\WindowsFormsApp2\\operate_schedule\\仪器定位.txt";
-            string text_path = step_textpath + "/仪器定位.txt";
-            string text_strs = ReadTxtContent(text_path);
-            mean_process.Text = text_strs;
-        }
 
         //左侧按键触发-全机水平测量
         private void btn_plane_meansure_Click(object sender, EventArgs e)
         {
-            //tabcontrol_main.SelectedTab = page_plane;
-            //stime = System.DateTime.Now.ToString("yyyy_MM_dd_HH：mm：ss");
-            //log += mean_process.Text + "\n";
-            //mean_process.Clear();
-            ////string text_path = @"F:\\C#_proj\\airplane_meansure_app_0416\\WindowsFormsApp2\\operate_schedule\\全机水平测量.txt";
-            //string text_path = step_textpath + "/全机水平测量.txt";
-            //string text_strs = ReadTxtContent(text_path);
-            //mean_process.Text = text_strs;
             Plane plane = new Plane(mInsList, mConnectedInsList);
-            plane.ShowDialog();
+            plane.FormBorderStyle = FormBorderStyle.None; //隐藏子窗体边框（去除最小花，最大化，关闭等按钮）
+            plane.TopLevel = false; //指示子窗体非顶级窗体
+            this.tabPage1.Controls.Add(plane);//将子窗体载入panel
+            plane.Show();
+            tabcontrol_main.SelectedTab = tabPage1;
 
         }
 
@@ -269,7 +176,6 @@ namespace WindowsFormsApp2
             stime = System.DateTime.Now.ToString("yyyy_MM_dd_HH：mm：ss");
             log += mean_process.Text + "\n";
             mean_process.Clear();
-            //string text_path = @"F:\\C#_proj\\airplane_meansure_app_0416\\WindowsFormsApp2\\operate_schedule\\雷达系统.txt";
             string text_path = step_textpath + "/雷达系统.txt";
             string text_strs = ReadTxtContent(text_path);
             mean_process.Text = text_strs;
@@ -281,7 +187,6 @@ namespace WindowsFormsApp2
             stime = System.DateTime.Now.ToString("yyyy_MM_dd_HH：mm：ss");
             log += mean_process.Text + "\n";
             mean_process.Clear();
-            //string text_path = @"F:\\C#_proj\\airplane_meansure_app_0416\\WindowsFormsApp2\\operate_schedule\\电子战系统.txt";
             string text_path = step_textpath + "/电子战系统.txt";
             string text_strs = ReadTxtContent(text_path);
             mean_process.Text = text_strs;
@@ -293,7 +198,6 @@ namespace WindowsFormsApp2
             stime = System.DateTime.Now.ToString("yyyy_MM_dd_HH：mm：ss");
             log += mean_process.Text + "\n";
             mean_process.Clear();
-            //string text_path = @"F:\\C#_proj\\airplane_meansure_app_0416\\WindowsFormsApp2\\operate_schedule\\CNI子系统.txt";
             string text_path = step_textpath + "/CNI子系统.txt";
             string text_strs = ReadTxtContent(text_path);
             mean_process.Text = text_strs;
@@ -305,7 +209,6 @@ namespace WindowsFormsApp2
             stime = System.DateTime.Now.ToString("yyyy_MM_dd_HH：mm：ss");
             log += mean_process.Text + "\n";
             mean_process.Clear();
-            //string text_path = @"F:\\C#_proj\\airplane_meansure_app_0416\\WindowsFormsApp2\\operate_schedule\\平显系统.txt";
             string text_path = step_textpath + "/平显系统.txt";
             string text_strs = ReadTxtContent(text_path);
             mean_process.Text = text_strs;
@@ -317,7 +220,6 @@ namespace WindowsFormsApp2
             stime = System.DateTime.Now.ToString("yyyy_MM_dd_HH：mm：ss");
             log += mean_process.Text + "\n";
             mean_process.Clear();
-            //string text_path = @"F:\\C#_proj\\airplane_meansure_app_0416\\WindowsFormsApp2\\operate_schedule\\惯性参考系统.txt";
             string text_path = step_textpath + "/惯性参考系统.txt";
             string text_strs = ReadTxtContent(text_path);
             mean_process.Text = text_strs;
@@ -330,7 +232,6 @@ namespace WindowsFormsApp2
             stime = System.DateTime.Now.ToString("yyyy_MM_dd_HH：mm：ss");
             log += mean_process.Text + "\n";
             mean_process.Clear();
-            //string text_path = @"F:\\C#_proj\\airplane_meansure_app_0416\\WindowsFormsApp2\\operate_schedule\\飞控系统.txt";
             string text_path = step_textpath + "/飞控系统.txt";
             string text_strs = ReadTxtContent(text_path);
             mean_process.Text = text_strs;
@@ -342,493 +243,25 @@ namespace WindowsFormsApp2
             stime = System.DateTime.Now.ToString("yyyy_MM_dd_HH：mm：ss");
             log += mean_process.Text + "\n";
             mean_process.Clear();
-            //string text_path = @"F:\\C#_proj\\airplane_meansure_app_0416\\WindowsFormsApp2\\operate_schedule\\光雷系统.txt";
             string text_path = step_textpath + "/光雷系统.txt";
             string text_strs = ReadTxtContent(text_path);
             mean_process.Text = text_strs;
         }
 
-
-        //导入飞机理论值
-        private void btn_import_conv_std_Click(object sender, EventArgs e)
-        {
-            //Import_std_data(dt_conv);
-
-        }
-
-        //导入机体靶点标准值
-        private void button5_Click(object sender, EventArgs e)
-        {
-            //Import_std_data(dt_plane);
-        }
-
-        //导入电子战理论值
-        private void btn_import_dzz_std_Click(object sender, EventArgs e)
-        {
-            //Import_std_data(dt_dzz);
-        }
-        //导入雷达理论值
-        private void btn_import_radar_std_Click(object sender, EventArgs e)
-        {
-            //Import_std_data(dt_radar);
-        }
-        //导入CNI理论值
-        private void btn_import_cni_std_Click(object sender, EventArgs e)
-        {
-            //Import_std_data(dt_cni);
-        }
-        //导入平显理论值
-        private void btn_import_px_std_Click(object sender, EventArgs e)
-        {
-            //Import_std_data(dt_px);
-        }
-        //导入惯性组件理论值
-        private void btn_import_irs_std_Click(object sender, EventArgs e)
-        {
-            //Import_std_data(dt_irs);
-        }
-        //导入飞控理论值
-        private void btn_import_fcs_std_Click(object sender, EventArgs e)
-        {
-            //Import_std_data(dt_fcs);
-        }
-        //导入光电理论值
-        private void btn_import_gd_std_Click(object sender, EventArgs e)
-        {
-            //Import_std_data(dt_gd);
-        }
-        //导入理论值函数
-        public void Import_std_data(DataTable target_ob)
-        {
-            //Myexcel myexcel = new Myexcel();
-            OpenFileDialog dlg = new OpenFileDialog();
-            dlg.Filter = "excel文件|*.xlsx";
-            object fileName = 0;
-            if (dlg.ShowDialog() == DialogResult.OK)
-            {
-                string fileName1 = dlg.FileName;
-                fileName = fileName1;
-            }
-            string str = (string)fileName;
-            IEnumerable<pts> stddata = myexcel.ImportExcel(str);
-            target_ob.Rows.Clear();
-            foreach (pts pts in stddata)
-            {
-                target_ob.Rows.Add(pts.ptname,pts.coordx,pts.coordy,pts.coordz);
-
-            }
-
-        }
-
         //连接摄像头
         private void btn_cam_connect_Click(object sender, EventArgs e)
         {
-            capture = new VideoCapture(0);
-            Mat frame = new Mat();
-            video_flag = true;
-
-            if (!capture.IsOpened()) // 如果摄像头打开失败
-            {
-                MessageBox.Show("相机连接失败");
-                return;
-            }
-
-            Thread video_th = new Thread(StartCapturing);
-            video_th.IsBackground = true;
-            video_th.Start();
-        }
-
-        public void StartCapturing()
-        {
-            Mat frame = new Mat();
-            Mat new_frame = new Mat();
-            while (video_flag)
-            {
-                capture.Read(frame);
-                if (frame.Empty())
-                {
-                    break;
-                }
-                using (Mat hsvImage = new Mat())
-                using (Mat redMask1 = new Mat())
-                using (Mat redMask2 = new Mat())
-                using (Mat redMask = new Mat())
-                {
-                    Cv2.CvtColor(frame, hsvImage, ColorConversionCodes.BGR2HSV);
-                    // 在HSV图像中定义红色范围
-                    Scalar lowerRed1 = new Scalar(0, 100, 100);
-                    Scalar upperRed1 = new Scalar(10, 255, 255);
-                    Scalar lowerRed2 = new Scalar(160, 100, 100);
-                    Scalar upperRed2 = new Scalar(179, 255, 255);
-                    // 通过颜色阈值，提取红色区域
-                    Cv2.InRange(hsvImage, lowerRed1, upperRed1, redMask1);
-                    Cv2.InRange(hsvImage, lowerRed2, upperRed2, redMask2);
-                    Cv2.Add(redMask1, redMask2, redMask);
-                    // 寻找红点的轮廓
-                    OpenCvSharp.Point[][] contours = Cv2.FindContoursAsArray(redMask, RetrievalModes.External, ContourApproximationModes.ApproxSimple);
-                    // 计算红点的中心并标记
-                    if (contours.Length > 0)
-                    {
-                        Moments moments = Cv2.Moments(contours[0]);
-                        OpenCvSharp.Point center = new OpenCvSharp.Point((int)(moments.M10 / moments.M00), (int)(moments.M01 / moments.M00));
-                        Cv2.Circle(frame, center, 3, new Scalar(255, 0, 0), -1);
-                        
-                    }
-                }
-                // 将帧显示到 pictureBox1 中
-                Cv2.Resize(frame, new_frame, new OpenCvSharp.Size(640 * frame_scale, 480 * frame_scale), 0, 0);
-                pictureBox1.Image = new_frame.ToBitmap(); 
-
-                // 控制处理速度
-                Thread.Sleep(50);
-            }
-            capture.Release(); // 释放视频捕获对象
-            FlushMemory();
-        }
-        public static void FlushMemory()
-        {
-            GarbageCollect();
-
-            if (Environment.OSVersion.Platform == PlatformID.Win32NT)
-            {
-                SetProcessWorkingSetSize(System.Diagnostics.Process.GetCurrentProcess().Handle, -1, -1);
-            }
-        }
-        [DllImport("kernel32.dll")]
-        public static extern bool SetProcessWorkingSetSize(IntPtr process, int minSize, int maxSize);
-        /// <summary>
-        /// 主动通知系统进行垃圾回收
-        /// </summary>
-        public static void GarbageCollect()
-        {
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
-            GC.Collect();
-        }
-
-        //关闭摄像头
-        private void btn_disconnect_cam_Click(object sender, EventArgs e)
-        {
-            video_flag = false;
-            pictureBox1.Image = null;
-
-        }
-        //相机缩放
-        private void zoomin_Click(object sender, EventArgs e)
-        {
-            frame_scale *= 1.2;
-        }
-        //相机缩放
-        private void zoomout_Click(object sender, EventArgs e)
-        {
-            frame_scale *= 0.8;
+            camera camera = new camera();
+            camera.Show();
         }
         //主程序退出
         private void close_main_Click(object sender, EventArgs e)
         {
-            log += mean_process.Text;
- 
-            System.IO.File.WriteAllText(info.save_path + "/log.txt", log);
-
             System.Environment.Exit(0);
         }
 
-        //保存全机测量数据
-        private void plane_save_Click(object sender, EventArgs e)
-        {
 
-            etime = System.DateTime.Now.ToString("yyyy_MM_dd_HH：mm：ss");
-            string filename = info.plane_num + "_" + tabcontrol_main.SelectedTab.Text + "_" + stime + "_" + etime;
-            //Myexcel myexcel = new Myexcel();
-            myexcel.ExportDataToExcel((DataTable)dataGridView_plane.DataSource, filename);
-        }
-
-        //保存雷达测量数据
-        private void radar_save_Click(object sender, EventArgs e)
-        {
-            etime = System.DateTime.Now.ToString("yyyy_MM_dd_HH：mm：ss");
-            string filename = info.plane_num + "_" + tabcontrol_main.SelectedTab.Text + "_" + stime + "_" + etime;
-            //Myexcel myexcel = new Myexcel();
-            myexcel.ExportDataToExcel((DataTable)dataGridView_radar.DataSource, filename);
-        }
-
-        //保存电子战系统测量单天线数据
-        private void btn_dzz_save_Click(object sender, EventArgs e)
-        {
-            etime = System.DateTime.Now.ToString("yyyy_MM_dd_HH：mm：ss");
-            string filename = info.plane_num + "_" + tabcontrol_main.SelectedTab.Text + "_" + stime + "_" + etime;
-            //Myexcel myexcel = new Myexcel();
-            myexcel.ExportDataToExcel((DataTable)dataGridView_dzz.DataSource, filename);
-        }
-
-        //保存CNI数据
-        private void cni_save_Click(object sender, EventArgs e)
-        {
-            etime = System.DateTime.Now.ToString("yyyy_MM_dd_HH：mm：ss");
-            string filename = info.plane_num + "_" + tabcontrol_main.SelectedTab.Text + "_" + stime + "_" + etime;
-            //Myexcel myexcel = new Myexcel();
-            myexcel.ExportDataToExcel((DataTable)dataGridView_cni.DataSource, filename);
-        }
-        //保存平显数据
-        private void px_save_Click(object sender, EventArgs e)
-        {
-            etime = System.DateTime.Now.ToString("yyyy_MM_dd_HH：mm：ss");
-            string filename = info.plane_num + "_" + tabcontrol_main.SelectedTab.Text + "_" + stime + "_" + etime;
-            //Myexcel myexcel = new Myexcel();
-            myexcel.ExportDataToExcel((DataTable)dataGridView_px.DataSource, filename);
-        }
-        //保存惯性系统数据
-        private void irs_save_Click(object sender, EventArgs e)
-        {
-            etime = System.DateTime.Now.ToString("yyyy_MM_dd_HH：mm：ss");
-            string filename = info.plane_num + "_" + tabcontrol_main.SelectedTab.Text + "_" + stime + "_" + etime;
-            //Myexcel myexcel = new Myexcel();
-            myexcel.ExportDataToExcel((DataTable)dataGridView_irs.DataSource, filename);
-        }
-        //保存飞控系统数据
-        private void fcs_save_Click(object sender, EventArgs e)
-        {
-            etime = System.DateTime.Now.ToString("yyyy_MM_dd_HH：mm：ss");
-            string filename = info.plane_num + "_" + tabcontrol_main.SelectedTab.Text + "_" + stime + "_" + etime;
-            //Myexcel myexcel = new Myexcel();
-            myexcel.ExportDataToExcel((DataTable)dataGridView_fcs.DataSource, filename);
-        }
-        //保存光电分布式孔径雷达数据
-        private void gd_save_Click(object sender, EventArgs e)
-        {
-            etime = System.DateTime.Now.ToString("yyyy_MM_dd_HH：mm：ss");
-            string filename = info.plane_num + "_" + tabcontrol_main.SelectedTab.Text + "_" + stime + "_" + etime;
-            //Myexcel myexcel = new Myexcel();
-            myexcel.ExportDataToExcel((DataTable)dataGridView_gd.DataSource, filename);
-        }
-        //计算飞机坐标系
-        private void button3_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        //转台控制
-        private void btn_table_control_Click(object sender, EventArgs e)
-        {
-            double a = 0; //设备间距
-            double b = 0; //激光点距离
-            double gamma = 0; //激光测距仪转角
-            //获取激光点距离和转角
-
-            
-
-            //计算转台转角
-            double gammaRadians = gamma * (Math.PI / 180);
-            double cosgamma = Math.Cos(gammaRadians);
-            double c = Math.Sqrt(Math.Pow(a, 2) + Math.Pow(b, 2) - 2 * a * b * cosgamma);
-            //
-            double alphaInRadians = Math.Acos((Math.Pow(b, 2) + Math.Pow(c, 2) - Math.Pow(a, 2)) / (2 * b * c));
-            double alphaInDegrees = alphaInRadians * (180.0 / Math.PI);
-            double betaDegrees = 180 - alphaInDegrees - gammaRadians * (180.0 / Math.PI);
-
-            //传输转台指令
-            //程序设置左右转动时，向左为负，比如向左转动45度，命令为-45。
-            double horizontaloAngle = double.Parse(textBox1.Text);//接收左右转动数据，因为不知道需求，这里新建文本框进行传输，还要结合激光雷达距离进行角度换算
-            horizontaloAngle = horizontaloAngle * 100;
-            double verticalAngle = double.Parse(textBox2.Text);//接收上下转动角度
-                                                               //double verticalAngle = 0;//激光测距仪垂直角度
-            verticalAngle = verticalAngle * 100;
-
-            if ((horizontaloAngle >= -6500 && horizontaloAngle <= 6500) && (verticalAngle > -4000 && verticalAngle <= 9000))
-            {
-                try
-                {
-                    if (horizontaloAngle <= -6500)
-                    {
-                        MessageBox.Show("水平角度超出限制", "提示");
-
-                    }
-                    else if (horizontaloAngle >= -6500 && horizontaloAngle <= 0)
-                    {
-                        horizontaloAngle = horizontaloAngle + 36000;
-                        sendCommond(CalCulaTion(0, 0x4b, Convert.ToString((int)horizontaloAngle / 256), Convert.ToString((int)horizontaloAngle % 256)));
-                    }
-                    else if (horizontaloAngle >= 0 && horizontaloAngle <= 6500)
-                    {
-                        sendCommond(CalCulaTion(0, 0x4b, Convert.ToString((int)horizontaloAngle / 256), Convert.ToString((int)horizontaloAngle % 256)));
-
-                    }
-                }
-                catch
-                {
-                    MessageBox.Show("水平角度传输有误", "提示");
-                }
-                try
-                {
-
-                    if (verticalAngle < -4000)
-                    {
-                        MessageBox.Show("垂直角度超出限制", "提示");
-                    }
-                    else if (verticalAngle > -4000 && verticalAngle <= 0)
-                    {
-                        sendCommond(CalCulaTion(0, 0x4d, Convert.ToString((int)verticalAngle / 256), Convert.ToString((int)verticalAngle % 256)));
-
-                    }
-                    else if (verticalAngle >= 0 && verticalAngle <= 9000)
-                    {
-                        sendCommond(CalCulaTion(0, 0x4d, Convert.ToString((int)verticalAngle / 256), Convert.ToString((int)verticalAngle % 256)));
-                    }
-                }
-                catch
-                {
-                    MessageBox.Show("垂直角度传输有误", "提示");
-                }
-            }
-            else
-            {
-                MessageBox.Show("角度超出限制", "提示");
-            }
-
-        }
-        private String CalCulaTion(int com1, int com2, String textData1, String textData2)
-        {
-            string cal = "";
-
-            int[] data1 = new int[7];
-
-            data1[0] = 0xFF;
-            data1[1] = Convert.ToInt16(1);
-            data1[2] = com1;
-            data1[3] = com2;
-            data1[4] = Convert.ToInt16(textData1);
-            data1[5] = Convert.ToInt16(textData2);
-            data1[6] = (data1[1] + data1[2] + data1[3] + data1[4] + data1[5]) & 0x00FF;
-
-            for (int i = 0; i < 7; i++)
-            {
-                cal += data1[i].ToString("X2") + " ";
-            }
-
-            return cal;
-        }
-        private void sendCommond(String com)
-        {
-            if (serialPort1.IsOpen)
-            {
-                try
-                {
-                    //textBox7.Text = com;//显示发送数据
-                    sendData(com);
-                }
-                catch
-                {
-                    MessageBox.Show("发送错误！", "提示");
-                }
-            }
-            else if (!serialPort1.IsOpen)
-            {
-                //textBox7.Text = com;
-                MessageBox.Show("串口未打开！", "提示");
-            }
-        }
-        private void sendData(String Send_Data)
-        {
-            byte[] Data = new byte[1];//字节数组``
-
-            try
-            {
-                string str = "";
-                char[] st;
-                st = Send_Data.ToCharArray();
-                for (int i = 0; i < st.Length; i++)
-                {
-                    if (st[i] != ' ')
-                    {
-                        str += st[i];
-                    }
-                }
-                for (int i = 0; i < str.Length / 2; i++)
-                {
-                    //每次取两位字符组成一个16进制
-                    Data[0] = Convert.ToByte(str.Substring(i * 2, 2), 16);
-                    serialPort1.Write(Data, 0, 1);//循环发送（如果输入字符为0A0BB,则只发送0A,0B）
-                }
-                if (str.Length % 2 != 0)//剩下一位单独处理
-                {
-                    Data[0] = Convert.ToByte(str.Substring(str.Length - 1, 1), 16);//单独发送B（0B）
-                    serialPort1.Write(Data, 0, 1);//发送
-                }
-            }
-            catch
-            {
-                MessageBox.Show("发送出错", "提示");
-            }
-        }
-
-        //转台链接
-        private void btn_table_connect_Click(object sender, EventArgs e)
-        {
-            if (IsOpen())
-            {
-                MessageBox.Show("转台已连接，请勿重复点击", "提示");
-            }
-            else
-            {
-                text_Serial_port();
-                SetSerialPortConfig("COM2", 9600, 1, 8, 1);//这里串口需更改为创建的虚拟串口
-                serialPort1.Open();//打开串口
-                MessageBox.Show("连接成功", "提示");
-            }
-        }
-        private bool IsOpen()
-        {
-            return (serialPort1.IsOpen);
-        }
-        private void text_Serial_port()
-        {
-            string[] ports = System.IO.Ports.SerialPort.GetPortNames(); //获得可用的串口
-            /*for (int i = 0; i < ports.Length; i++)
-            {
-                if (ports.Contains("2"))
-                {
-
-                }
-                else
-                {
-                    MessageBox.Show("请打开虚拟串口软件", "提示");
-                }
-                //comboBox1.Items.Add(ports[i]);
-            }
-            comboBox1.SelectedIndex = comboBox1.Items.Count > 0 ? 0 : -1;//如果里面有数据,显示第0个*/
-        }
-        private void SetSerialPortConfig(String portName, int baudRate, int parity, int dataBits, int stopBits)
-        {
-            serialPort1.PortName = portName;//获取要打开的串口
-            serialPort1.BaudRate = baudRate;//获得波特率
-            serialPort1.DataBits = dataBits;//获得数据位
-            switch (parity)
-            {
-                case 0:
-                default:
-                    serialPort1.Parity = Parity.None;
-                    break;
-
-                case 1:
-                    serialPort1.Parity = Parity.Odd;
-                    break;
-
-                case 2:
-                    serialPort1.Parity = Parity.Even;
-                    break;
-            }
-            switch (stopBits)
-            {
-                case 1:
-                default:
-                    serialPort1.StopBits = StopBits.One;
-                    break;
-
-                case 2:
-                    serialPort1.StopBits = StopBits.Two;
-                    break;
-            }
-        }
+       
 
 
         //连接SA
@@ -836,11 +269,12 @@ namespace WindowsFormsApp2
         {
             if (null == mpObj)
             {
-                //Todo:这里sa软件安装位置和模板文件位置需要根据实际情况更改，最好可以通过配置文件设置
-                //string _SAPath = "C:\\Program Files (x86)\\New River Kinematics\\SpatialAnalyzer 2014.04.15\\Spatial Analyzer.exe";
-                //string FilePath = "D:\\Programming\\airplane_meansure_app_0329\\airplane_meansure_app_0329\\WindowsFormsApp2\\bin\\Debug\\调姿测量.xit";
                 string _SAPath = ReadTxtContent(step_textpath + "/SA_path.txt");
+                //string _SAPath = ReadTxtContent(step_textpath + "/SA_path_pre.txt");
+                _SAPath = _SAPath.Remove(_SAPath.Length - 1, 1);
                 string FilePath = ReadTxtContent(step_textpath + "/mean_path.txt");
+                //string FilePath = ReadTxtContent(step_textpath + "/mean_path_pre.txt");
+                FilePath = FilePath.Remove(FilePath.Length - 1, 1);
                 mpObj = new MpClass(_SAPath, FilePath);
             }
             else
@@ -880,17 +314,7 @@ namespace WindowsFormsApp2
                 }
                 mInsList = new BindingList<Instrument>();
 
-                //数据绑定
-                //BindingList <Instrument> bList  = new BindingList<Instrument>(mInsList);
-
                 dataGridView_dev.DataSource = mInsList;
-                //for (int i = 0; i < 5; i++)
-                //{
-                //    bList.Add(new Instrument()
-                //    {
-                //        InsID = i
-                //    });
-                //}
 
 
                 int InsListNum = mInsList.Count();
@@ -902,7 +326,7 @@ namespace WindowsFormsApp2
                 for (int i = 0; i < iInsID; i++)
                 {
                     Instrument ins = new Instrument(mpObj);
-                    ins.InsID=i;
+                    ins.InsID = i;
                     ins.SetCollectionName(col);
                     ins.Name = "设备" + i.ToString();
                     mInsList.Add(ins);
@@ -937,9 +361,10 @@ namespace WindowsFormsApp2
                 Instrument ins = new Instrument(mpObj);
                 ins.InsID = InsID;
                 ins.InsType = "Leica emScon Absolute Tracker(AT901 Series)";
-                ins.Connected = true;
+                //ins.Connected = true;
                 ins.SetCollectionName(col);
                 mInsList.Add(ins);
+                MessageBox.Show("添加仪器成功");
             }
             else
             {
@@ -973,7 +398,7 @@ namespace WindowsFormsApp2
                 if (mInsList.Count() > InsIDToConnect)
                 {
                     //测试
-                    if (mInsList.ElementAt(InsIDToConnect).StartIns("A", InsIDToConnect, true, "127.0.0.1", true))
+                    if (mInsList.ElementAt(InsIDToConnect).StartIns("A", InsIDToConnect, true, "192.168.0.1", true))
                     {
                         mInsList.ElementAt(InsIDToConnect).Connected = true;
                         mConnectedInsList.Add(mInsList.ElementAt(InsIDToConnect));
@@ -1011,7 +436,7 @@ namespace WindowsFormsApp2
                 for (int i = 0; i < InsNumber; i++)
                 {
                     Instrument ins = new Instrument(mpObj);
-                    ins. InsID = i;
+                    ins.InsID = i;
                     ins.SetCollectionName("A");
                     mInsList.Add(ins);
                 }
@@ -1027,325 +452,505 @@ namespace WindowsFormsApp2
 
         private void combSelTracker_SelectedIndexChanged(object sender, EventArgs e)
         {
-            InsLocate(true);
+            Locate locate = new Locate(mInsList, mConnectedInsList);
+            locate.ShowDialog();
         }
 
-        // 进行仪器定位,把误差取出来
-        public bool InsLocate(bool bShowInterface)
+
+        //导入飞机基准点坐标
+        private void button4_Click(object sender, EventArgs e)
         {
 
-            //UpdateData(FALSE);
-            //获取当前仪器
-            //int InsSel = m_CombIns.GetCurSel();
-            //if (-1 == InsSel)
-            //{
-            //    return FALSE;
-            //}
-            int InsSel = 0;
-
-            //CInstrument * ins;
-            //ins = (CInstrument*)m_CombIns.GetItemData(InsSel);
-            //if (NULL == ins)
-            //{
-            //    return FALSE;
-            //}
-            Instrument ins = mInsList.ElementAt(InsSel);
-
-            //CStringArray pMeasNameList;
-            ////看集合是否存在，没有则可自己添加一个集合
-            //CStringArray pTheoNameList;
-
-            List<string> pMeasNameList = new List<string>();
-            List<string> pTheoNameList = new List<string>();
-
-            string m_ERSTheoCol = "A";
-            string m_ERSTheoGroupName = "Theo";
-
-            string m_ERSMeasCol = "A";
-            string m_ERSMeasGroupName = "Meas";
-
-            int Number = 0;
-            if (mpObj.GetNumberOfPointsInGroup(m_ERSTheoCol, m_ERSTheoGroupName, ref Number))
+            OpenFileDialog dlg = new OpenFileDialog();
+            dlg.Filter = "txt文件|*.txt";
+            if (dlg.ShowDialog() == DialogResult.OK)
             {
-                if (Number <= 0)
+                string fileName1 = dlg.FileName;
+
+                //导入基准点数据到SA
+
+                if (!mpObj.ImportASCII(fileName1, "点名 X Y Z", "毫米", "A", "飞机基准点"))
                 {
-                    return false;
+                    MessageBox.Show("导入" + fileName1 + " 文件失败！");
                 }
-                if (!mpObj.MakeAPointNameRefListFromAGroup(m_ERSTheoCol, m_ERSTheoGroupName, ref pTheoNameList))
+                else
                 {
-                    //theApp.WriteLog(_T("获取ERS理论点集合失败!"));
+                    text_gnd_theo.Text = "A::飞机基准点";
 
-                    return false;
-                }
-            }
-            else
-            {
-                return false;
-            }
-            //测量集合须重新加载
-            if (mpObj.GetNumberOfPointsInGroup(m_ERSMeasCol, m_ERSMeasGroupName, ref Number))
-            {
-                if (Number <= 0)
-                {
-                    return false;
-                }
-                if (!mpObj.MakeAPointNameRefListFromAGroup(m_ERSMeasCol, m_ERSMeasGroupName, ref pMeasNameList))
-                {
-                    //theApp.WriteLog(_T("获取ERS测量点集合失败!"));
-                    return false;
-                }
-            }
-            else
-            {
-                return false;
-            }
+                    string TempCol = "A";
+                    string TempGroupName = "飞机基准点";
+                    string TempPtName = "";
+                    List<string> TempPntName = new List<string>();
+                    int theoNum = 0;
+                    double x = 0, y = 0, z = 0;
+                    List<string> strings = new List<string>();
+                    //列表中显示点信息
+                    //获取所选点组中各点信息
+                    mpObj.GetNumberOfPointsInGroup(TempCol, TempGroupName, ref theoNum);
+                    mpObj.MakeAPointNameRefListFromAGroup(TempCol, TempGroupName, ref TempPntName);
 
-
-            //如果点数不够，则不进行定位
-            int ThoeNumber = 0;
-            ThoeNumber = pTheoNameList.Count();
-
-            if (ThoeNumber < 3)
-            {
-                return false;
-            }
-
-            int MeasNumber = 0;
-            MeasNumber = pMeasNameList.Count();
-            string txt = "";
-            string Col = "";
-            string Grp = "";
-            string MeasName = "";
-            string TheoName = "";
-
-            if (MeasNumber < 3)
-            {
-                for (int i = 0; i < MeasNumber; i++)
-                {
-                    mpObj.GetPntInfoFromName(pMeasNameList.ElementAt(i), ref Col, ref Grp, ref MeasName);
-                    for (int j = 0; j < ThoeNumber; j++)
+                    for (int i = 0; i < theoNum; i++)
                     {
-                        //如果两个点的名称一致
-                        mpObj.GetPntInfoFromName(pTheoNameList.ElementAt(j), ref Col, ref Grp, ref TheoName);
-                        if (MeasName == TheoName)
-                        {
-                            //设置误差
-                            //txt = _T("****.***");
-                            //m_ListERS.SetItemText(j, 1, txt);
-                            //m_ListERS.SetItemText(j, 2, txt);
-                            //m_ListERS.SetItemText(j, 3, txt);
-                            //m_ListERS.SetItemBkColor(j, -1, COLOR_INVALID);
-                        }
+                        mpObj.GetPntInfoFromName(TempPntName[i], ref TempCol, ref TempGroupName, ref TempPtName);
+                        mpObj.GetPointCoordinate(TempCol, TempGroupName, TempPtName, ref x, ref y, ref z);
+                        pointDataList_PF.Add(new Point_cloud(TempPtName, new Vector3((float)x, (float)y, (float)z), zeros));
+                    }
+                    
+                    dataGridView_PF.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+                    dataGridView_PF.DataSource = pointDataList_PF;
+                    dataGridView_PF.Refresh();
+                }
+            }
+        }
+
+        public float StrToFloat(object FloatString)
+        {
+            float result;
+            if (FloatString != null)
+            {
+                if (float.TryParse(FloatString.ToString(), out result))
+                    return result;
+                else
+                {
+                    return (float)0.00;
+                }
+            }
+            else
+            {
+                return (float)0.00;
+            }
+        }
+
+
+        //地面靶球测量
+        private void button5_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show("请先在SA界面设置测量模式为：1.5英寸靶球测量");
+            Pts_plane_loc = "地面测量点::";
+            //单点测量
+            if (null == mpObj)
+            {
+                MessageBox.Show("未连接仪器！");
+                return;
+            }
+            //获取需要连接的仪器ID
+            int InsIDToConnect = 0;
+            double x = 0, y = 0, z = 0;
+            int index = dataGridView_gnd.CurrentRow.Index;
+            if (mInsList.Count() > InsIDToConnect && index >=0)
+            {
+                if (mInsList.ElementAt(InsIDToConnect).Connected)
+                {
+
+                    //如果已经有点，删除点
+                    string[] listPntToDelete = new string[1];
+
+                    MessageBox.Show(pointDataList_GND.Count().ToString());
+
+                    listPntToDelete[0] = "A::" + Pts_plane_loc + pointDataList_GND[index].ptname;
+                    mpObj.DeletePoints(listPntToDelete);
+
+                    //测试
+                    if (mInsList.ElementAt(InsIDToConnect).MeasureSinglePnt("A::" + Pts_plane_loc + pointDataList_GND[index].ptname))
+                    {
+                        MessageBox.Show("测量" + Pts_plane_loc + pointDataList_GND[index].ptname + "成功！");
+                        //TODO：把点信息显示到界面上
+                        mpObj.GetPointCoordinate("A", Pts_plane_loc.Split(':')[0], pointDataList_GND[index].ptname, ref x, ref y, ref z);
+                        //TODO：把点信息显示到界面上
+                        dataGridView_gnd.Rows[index].Cells[2].Value = new Vector3((float)x, (float)y, (float)z);
+                    }
+                    else
+                    {
+                        MessageBox.Show("测量" + Pts_plane_loc + pointDataList_GND[index].ptname + "失败！");
                     }
                 }
-                return false;
-            }
 
-            //int nItem = 0;
-            //LVITEM item;
-            //item.mask = LVIF_TEXT | LVIF_IMAGE;
-            //item.iItem = nItem;
-            //item.iSubItem = 0;
-            //仪器定位前，先需要设置当前仪器的站位参数为零，保证
-
-            //定位仪器
-            if (ins.LocateInstrumentBestFit(m_ERSTheoCol, m_ERSTheoGroupName, m_ERSMeasCol, m_ERSMeasGroupName, bShowInterface))
-            {
-
-                // 定位成功
-                //return UpdateErrorView();
             }
             else
             {
-                //定位失败
-                //for (int i = 0;i<MeasNumber;i++)
-                //{
-                //	theApp.m_Operator.GetPntInfoFromName(pMeasNameList.GetAt(i),Col,Grp,MeasName);
-                //	for (int j = 0;j< ThoeNumber;j++)
-                //	{
-                //		//如果两个点的名称一致
-                //		theApp.m_Operator.GetPntInfoFromName(pTheoNameList.GetAt(j),Col,Grp,TheoName);
-                //		if (MeasName == TheoName)	
-                //		{
-                //			//设置误差
-                //			txt = _T("****.***");
-                //			m_ListERS.SetItemText(j,1,txt);
-                //			m_ListERS.SetItemText(j,2,txt);
-                //			m_ListERS.SetItemText(j,3,txt);
-                //		}
-                //	}
-                //}
-                return false;
+                MessageBox.Show("仪器号码过大，系统中没有添加该仪器！");
             }
-            return false;
+
         }
 
-        ////初始化数据表
-        //public DataTable Dt_init1(DataTable dt)
-        //{
-        //    dt.Columns.Add("点名", typeof(string));
-        //    dt.Columns.Add("X理论值", typeof(float));
-        //    dt.Columns.Add("Y理论值", typeof(float));
-        //    dt.Columns.Add("Z理论值", typeof(float));
-        //    dt.Columns.Add("X测量值", typeof(float));
-        //    dt.Columns.Add("Y测量值", typeof(float));
-        //    dt.Columns.Add("Z测量值", typeof(float));
-        //    dt.Columns.Add("X误差", typeof(float));
-        //    dt.Columns.Add("Y误差", typeof(float));
-        //    dt.Columns.Add("Z误差", typeof(float));
-        //    dt.Columns.Add("平均误差", typeof(float));
 
-        //    return dt;
-        //}
-        //public DataTable Dt_init2(DataTable dt)
-        //{
-        //    dt.Columns.Add("点名", typeof(string));
-        //    dt.Columns.Add("X理论值", typeof(float));
-        //    dt.Columns.Add("Y理论值", typeof(float));
-        //    dt.Columns.Add("Z理论值", typeof(float));
-        //    dt.Columns.Add("X测量值", typeof(float));
-        //    dt.Columns.Add("Y测量值", typeof(float));
-        //    dt.Columns.Add("Z测量值", typeof(float));
-        //    return dt;
-        //}
-        //public DataTable Dt_init3(DataTable dt)
-        //{
-        //    dt.Columns.Add("点名", typeof(string));
-        //    dt.Columns.Add("X", typeof(float));
-        //    dt.Columns.Add("Y", typeof(float));
-        //    dt.Columns.Add("Z", typeof(float));
-        //    return dt;
-        //}
-        ////仪器table
-        //public DataTable Dt_init_dev(DataTable dt)
-        //{
-        //    dt.Columns.Add("ID", typeof(string));
-        //    dt.Columns.Add("Name", typeof(string));
-        //    dt.Columns.Add("Status", typeof(bool));
-        //    return dt;
-        //}
-
-        //创建各存放数据的datatable并绑定数据项
-        //public void create_tables()
-        //{
-        //    //仪器信息绑定到仪器类
-        //    //dt_dev = Dt_init_dev(dt_dev);
-        //    //this.dataGridView_dev.DataSource = dt_dev;
-        //    //基准点标定table
-        //    dt_gnd = Dt_init3(dt_gnd);
-        //    this.dataGridView_gnd.DataSource = dt_gnd;
-        //    //仪器定位table
-        //    dt_loc = Dt_init2(dt_loc);
-        //    this.dataGridView_loc.DataSource = dt_loc;
-        //    //飞机坐标系table
-        //    dt_conv = Dt_init2(dt_conv);
-        //    this.dataGridView_conv.DataSource = dt_conv;
-
-
-        //    //全机table
-        //    //dt_plane = Dt_init1(dt_plane);
-        //    //this.dataGridView_plane.DataSource = dt_plane;
-
-        //    //Pc_plane.AddPoint(new Vector3(1, 2, 3));//添加新点
-
-        //    //PointCloudBinder.BindPointCloudToDatatable_mean(Pc_plane, dt_plane);//将数据传到绑定的datasource
-        //    //RemoveBlankRows(dataGridView_plane);//移除空白行
-        //    //dataGridView_plane.Refresh();//刷新
-
-
-        //    //雷达table
-        //    dt_radar = Dt_init1(dt_radar);
-        //    this.dataGridView_radar.DataSource = dt_radar;
-        //    //电子战table
-        //    dt_dzz = Dt_init1(dt_dzz);
-        //    this.dataGridView_dzz.DataSource = dt_dzz;
-        //    //CNI table
-        //    dt_cni = Dt_init1(dt_cni);
-        //    this.dataGridView_cni.DataSource = dt_cni;
-        //    //平显table
-        //    dt_px = Dt_init1(dt_px);
-        //    this.dataGridView_px.DataSource = dt_px;
-        //    //惯性table
-        //    dt_irs = Dt_init1(dt_irs);
-        //    this.dataGridView_irs.DataSource = dt_irs;
-        //    //飞控table
-        //    dt_fcs = Dt_init1(dt_fcs);
-        //    this.dataGridView_fcs.DataSource = dt_fcs;
-        //    //光电table
-        //    dt_gd = Dt_init1(dt_gd);
-        //    this.dataGridView_gd.DataSource = dt_gd;
-        //}
-        //datagridview数据闪烁
-        public void dgv_DoubleBuffer_init()
+        //建立飞机坐标系
+        private void button1_Click(object sender, EventArgs e)
         {
-            dataGridView_dev.DoubleBufferedDataGirdView(true);
-            dataGridView_gnd.DoubleBufferedDataGirdView(true);
-            dataGridView_loc.DoubleBufferedDataGirdView(true);
-            dataGridView_conv.DoubleBufferedDataGirdView(true);
-            dataGridView_plane.DoubleBufferedDataGirdView(true);
-            dataGridView_radar.DoubleBufferedDataGirdView(true);
-            dataGridView_dzz.DoubleBufferedDataGirdView(true);
-            dataGridView_cni.DoubleBufferedDataGirdView(true);
-            dataGridView_px.DoubleBufferedDataGirdView(true);
-            dataGridView_irs.DoubleBufferedDataGirdView(true);
-            dataGridView_fcs.DoubleBufferedDataGirdView(true);
-            dataGridView_gd.DoubleBufferedDataGirdView(true);
+            //设置当前坐标系为默认的世界坐标系
+
+            //1为飞机坐标系下理论点集
+            //2为测量点集
+
+            mpObj.SetWorkingFrame("A", "WORLD");
+            string RefCol = "A";
+            string RefGroup ="飞机基准点";
+            string CorrespondingCol ="A";
+            string CorrespondingGroup = "飞机测量点";
+
+            bool bShowInterface = false;
+            double dRMS = 0.0;
+            double dAbsTol = 0.0 ;
+            double[,] sTransform = new double[4, 4];
+
+            //计算转换矩阵
+            mpObj.BestFitTransformationGrouptoGroup(RefCol, RefGroup, CorrespondingCol, CorrespondingGroup,
+                bShowInterface, dRMS, dAbsTol, ref sTransform);
+
+            ////构建之前先删除坐标系
+            //string colName = "";
+            //string ObjName = "";
+            //mpObj.MakeACollectionObjectNameFromStrings("A", "产品坐标系", "Frame",ref colName,ref ObjName);
+
+            //object ObjList = null;
+            //mpObj.AddACollectionObjectNameToARefList("TempFrame", colName, ObjName, ref ObjList);
+            //mpObj.DeleteObjects(ref ObjList);
+
+
+            //A::New::坐标系
+            //转换矩阵转构建坐标系
+            mpObj.ConstructFrame("A", "飞机坐标系", sTransform);
+
+            //激活坐标系
+            mpObj.SetWorkingFrame("A", "飞机坐标系");
+
+
         }
 
-        private void RemoveBlankRows(DataGridView dgv)
+        //首次测量地面基准点
+        private void gnd_import_Click(object sender, EventArgs e)
         {
-            for (int i = dgv.Rows.Count - 1; i >= 0; i--)
+            MessageBox.Show("请先在SA界面设置测量模式为：1.5英寸靶球测量");
+            Pts_plane_loc = "地面基准点::";
+
+            //单点测量
+            if (null == mpObj)
             {
-                var row = dgv.Rows[i];
-                if (row.Cells.Cast<DataGridViewCell>().All(cell => string.IsNullOrEmpty(cell.Value?.ToString())))
+                MessageBox.Show("未连接仪器！");
+                return;
+            }
+            //获取需要连接的仪器ID
+            int InsIDToConnect = 0;
+            double x = 0, y = 0, z = 0;
+            if(index_gnd == 0)
+            {
+                for (int i = 0; i < num_gnd; i++)
                 {
-                    dgv.Rows.RemoveAt(i);
+                    pointDataList_GND.Add(new Point_cloud("P" + i.ToString(), zeros, zeros));
+
                 }
+                dataGridView_gnd.DataSource = pointDataList_GND;
+                dataGridView_gnd.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+                dataGridView_gnd.Refresh();
             }
-        }
-        //图像界面最大化和恢复
-        private void pictureBox1_DoubleClick(object sender, EventArgs e)
-        {
-            System.Drawing.Size primarySize = new System.Drawing.Size(640,480);
-            //最大化
-            if(fullScreenFlag1 == false)
+
+
+
+            if (mInsList.Count() > InsIDToConnect)
             {
-                this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
-                this.WindowState = FormWindowState.Maximized;
-                Rectangle ret = Screen.GetWorkingArea(this);
-                this.pictureBox1.ClientSize = new System.Drawing.Size(ret.Width, ret.Height);
-                this.pictureBox1.Dock = DockStyle.Fill;
-                this.pictureBox1.BringToFront();
-                fullScreenFlag1 = true;
+                if (mInsList.ElementAt(InsIDToConnect).Connected)
+                {
+
+                    //如果已经有点，删除点
+                    string[] listPntToDelete = new string[1];
+
+                    listPntToDelete[0] = "A::地面基准点::P" + index_gnd.ToString();
+                    mpObj.DeletePoints(listPntToDelete);
+
+                    //测试
+                    if (mInsList.ElementAt(InsIDToConnect).MeasureSinglePnt("A::地面基准点::P" + index_gnd.ToString()))
+                    {
+                        MessageBox.Show("测量地面基准点P" + index_gnd.ToString() + "成功！");
+                        //TODO：把点信息显示到界面上
+                        mpObj.GetPointCoordinate("A", "地面基准点", "P" + index_gnd.ToString(), ref x, ref y, ref z);
+                        //TODO：把点信息显示到界面上
+
+                        dataGridView_gnd.Rows[index_gnd].Cells[1].Value = new Vector3((float)x, (float)y, (float)z);
+
+                        index_gnd++;
+
+                    }
+                    else
+                    {
+                        MessageBox.Show("测量" + Pts_plane_loc + "P" + index_gnd.ToString() + "失败！");
+                    }
+                }
+
             }
             else
             {
-                //恢复
-                this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.Sizable;
-                this.WindowState = FormWindowState.Normal;
-                //primarySize即是控件的原始尺寸，也可 new Size(Width, Height);width和height全屏之前的
-                this.pictureBox1.ClientSize = primarySize;
-                this.pictureBox1.Dock = DockStyle.None;
-                fullScreenFlag1 = false;
+                MessageBox.Show("仪器号码过大，系统中没有添加该仪器！");
             }
 
-
-            
+            dataGridView_gnd.Refresh();
         }
-    }
-    //datagridview 数据闪烁
-    public static class DoubleBufferDataGridView
-    {
-        /// <summary>
-        /// 双缓冲，解决闪烁问题
-        /// </summary>
-        public static void DoubleBufferedDataGirdView(this DataGridView dgv, bool flag)
+
+
+        //选择测量点组
+        private void gnd_choose_theo_Click(object sender, EventArgs e)
         {
-            Type dgvType = dgv.GetType();
-            PropertyInfo pi = dgvType.GetProperty("DoubleBuffered", BindingFlags.Instance | BindingFlags.NonPublic);
-            pi.SetValue(dgv, flag, null);
+            //如果按钮被已被按下，则不响应
+            string Prompt = ("选择基准点组合");
+            string TempCol = "";
+            string TempGroupName = "";
+            string TempPtName = "";
+            List<string> TempPntName = new List<string>();
+            int theoNum = 0;
+            double x = 0, y = 0, z = 0;
+            //从SA中选择测量点
+            mpObj.MakeACollectionObjectNameRuntimeSelect(Prompt, "Point Group", ref TempCol, ref TempGroupName);
+
+            Prompt = TempCol + ("::") + TempGroupName;
+            text_gnd_theo.Text = Prompt;
+
+            //获取所选点组中各点信息
+            mpObj.GetNumberOfPointsInGroup(TempCol, TempGroupName, ref theoNum);
+            mpObj.MakeAPointNameRefListFromAGroup(TempCol, TempGroupName, ref TempPntName);
+
+            for (int i = 0; i < theoNum; i++)
+            {
+                mpObj.GetPntInfoFromName(TempPntName[i], ref TempCol, ref TempGroupName, ref TempPtName);
+                mpObj.GetPointCoordinate(TempCol, TempGroupName, TempPtName, ref x, ref y, ref z);
+                pointDataList_GND.Add(new Point_cloud(TempPtName, new Vector3((float)x, (float)y, (float)z), zeros));
+            }
+            dataGridView_gnd.DataSource = pointDataList_GND;
+            dataGridView_gnd.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            dataGridView_gnd.Refresh();
+        }
+
+
+        //地面坐标系构建
+        private void gnd_frame_Click(object sender, EventArgs e)
+        {
+            if (comboBox_gnd.Items.Count <= 0)
+            {
+                return;
+            }
+
+            Instrument selectedIns = (Instrument)comboBox_gnd.SelectedItem;
+            //string pTheoNameList = "";
+            //string pMeasNameList = "";
+
+            int TheoPntNumber = 0;
+            mpObj.GetNumberOfPointsInGroup("A", "地面基准点", ref TheoPntNumber);
+
+
+            if (TheoPntNumber <= 0)
+            {
+                //理论点数量太少
+                return;
+            }
+
+            int MeasPntNumber = 0;
+            mpObj.GetNumberOfPointsInGroup("A", "地面测量点", ref MeasPntNumber);
+            if (MeasPntNumber <= 0)
+            {
+                //测量数量太少
+                return;
+            }
+            string sRefCollection = "A";
+            string sRefGroup = "地面基准点";
+            string sCorrespondingCollection = "A";
+            string sCorrespondingGroup = "地面测量点";
+
+            double[,] sTransform = new double[4, 4];
+            double dScale = 1;
+
+
+            if (mpObj.LocateInstrumentBestFitGroupToGroup(sRefCollection, sRefGroup, sCorrespondingCollection, sCorrespondingGroup,
+          true, 0.0, 0.0, ref sTransform, ref dScale))
+            {
+                //调用该函数后，软件弹出转站对话框，本软件会弹出等待的对话框，该对话框无法被关闭。只有当SA软件操作结束后，本软件弹出的等待对话框才能被关闭；
+                MessageBox.Show("请在SA完成转站操作后关闭本窗口");
+            }
+        } 
+
+        private void plane_select_pointGroup_Click(object sender, EventArgs e)
+        {
+            //如果按钮被已被按下，则不响应
+            string Prompt = ("选择理论点组合");
+            string TempCol = "";
+            string TempGroupName = "";
+            string TempPtName = "";
+            List<string> TempPntName = new List<string>();
+            int theoNum = 0;
+            double x = 0, y = 0, z = 0;
+            //从SA中选择理论点
+            mpObj.MakeACollectionObjectNameRuntimeSelect(Prompt, "Point Group", ref TempCol, ref TempGroupName);
+
+            Prompt = TempCol + ("::") + TempGroupName;
+            text_pf_theo.Text = Prompt;
+
+            //获取所选点组中各点信息
+            mpObj.GetNumberOfPointsInGroup(TempCol, TempGroupName, ref theoNum);
+            mpObj.MakeAPointNameRefListFromAGroup(TempCol, TempGroupName, ref TempPntName);
+
+            for (int i = 0; i < theoNum; i++)
+            {
+                mpObj.GetPntInfoFromName(TempPntName[i], ref TempCol, ref TempGroupName, ref TempPtName);
+                mpObj.GetPointCoordinate(TempCol, TempGroupName, TempPtName, ref x, ref y, ref z);
+                pointDataList_PF.Add(new Point_cloud(TempPtName, new Vector3((float)x, (float)y, (float)z), zeros));
+            }
+            dataGridView_PF.DataSource = pointDataList_PF;
+            dataGridView_PF.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            dataGridView_PF.Refresh();
+
+        }
+
+        //选择的设备更改时
+        private void comboBox_gnd_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            Locate locate = new Locate(mInsList, mConnectedInsList);
+            locate.ShowDialog();
+        }
+
+        //连接转台
+        private void btn_table_connect_Click(object sender, EventArgs e)
+        {
+            tableControl.tab_connect();
+        }
+
+        //测量角可视化
+        private void radar_x_error_TextChanged(object sender, EventArgs e)
+        {
+            double number;
+            bool success = double.TryParse(radar_x_error.Text,out number);
+            if (success && number <2 && number >-2)
+            {
+                trackBar1.Value = (int)(number * 1000);
+            }
+            else
+            {
+                trackBar1.Value = 0;
+            }
+        }
+
+        private void radar_y_error_TextChanged(object sender, EventArgs e)
+        {
+            double number;
+            bool success = double.TryParse(radar_y_error.Text, out number);
+            if (success && number < 2 && number > -2)
+            {
+                trackBar2.Value = (int)(number * 1000);
+            }
+            else
+            {
+                trackBar2.Value = 0;
+            }
+        }
+
+        private void radar_z_error_TextChanged(object sender, EventArgs e)
+        {
+            double number;
+            bool success = double.TryParse(radar_z_error.Text, out number);
+            if (success && number < 2 && number > -2)
+            {
+                trackBar3.Value = (int)(number * 1000);
+            }
+            else
+            {
+                trackBar3.Value = 0;
+            }
+        }
+
+        //选择项目  更改子项目内容
+        private void comboBox_sel_1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            int ind = comboBox_sel_1.SelectedIndex;
+            switch(ind)
+            {
+                case 0://雷达系统
+                    comboBox_sel_2.Items.Clear(); 
+                    comboBox_sel_2.Items.AddRange(new object[] {
+                    "雷达面安装角测量"});
+                    comboBox_sel_2.SelectedIndex = 0;
+                    break;
+                case 1: //电子战系统
+                    comboBox_sel_2.Items.Clear();
+                    comboBox_sel_2.Items.AddRange(new object[] {
+                    "前向ESM","ECM天线","前向ESM","俯仰天线","后向ESM","ECM天线"});
+                    comboBox_sel_2.SelectedIndex = 0;
+                    break;
+                case 2://CNI
+                    comboBox_sel_2.Items.Clear();
+                    comboBox_sel_2.Items.AddRange(new object[] {
+                    "机间数据链天线（前上)",
+                    "机间数据链天线（前下)",
+                    "机间数据链天线（前左)",
+                    "机间数据链天线（前右)",
+                    "机间数据链天线（后左)",
+                    "机间数据链天线（后右)",
+                    "卫星通讯天线"});
+                    comboBox_sel_2.SelectedIndex = 0;
+                    break;
+                case 3://平显
+                    comboBox_sel_2.Items.Clear();
+                    comboBox_sel_2.Items.AddRange(new object[] {
+                    "平显前平面","平显上平面","平显侧平面"});
+                    comboBox_sel_2.SelectedIndex = 0;
+                    break;
+                case 4://惯性
+                    comboBox_sel_2.Items.Clear();
+                    comboBox_sel_2.Items.AddRange(new object[] {
+                    "捷联惯导系统（座舱下方左右）","光纤捷联航姿系统（座舱下方）"});
+                    comboBox_sel_2.SelectedIndex = 0;
+                    break;
+                case 5://飞控
+                    comboBox_sel_2.Items.Clear();
+                    comboBox_sel_2.Items.AddRange(new object[] {
+                    "左速率陀螺传感器安装支架","右速率陀螺传感器安装支架","加速度传感器组件"});
+                    comboBox_sel_2.SelectedIndex = 0;
+                    break;
+                case 6://光雷
+                    comboBox_sel_2.Items.Clear();
+                    comboBox_sel_2.Items.AddRange(new object[] {
+                    "IRST系统","DAS天线(1）","DAS天线(2）","DAS天线(3）","DAS天线(4）","DAS天线(5）","DAS天线(6）"});
+                    comboBox_sel_2.SelectedIndex = 0;
+                    break;
+            }
+        }
+
+        private void button4_Click_1(object sender, EventArgs e)
+        {
+            Locate locate = new Locate(mInsList, mConnectedInsList);
+            locate.ShowDialog();
+        }
+
+        private void button5_Click_1(object sender, EventArgs e)
+        {
+            Locate locate = new Locate(mInsList, mConnectedInsList);
+            locate.ShowDialog();
+        }
+
+        private void btn_radar_loc_Click(object sender, EventArgs e)
+        {
+            Locate locate = new Locate(mInsList, mConnectedInsList);
+            locate.ShowDialog();
+        }
+
+        private void button6_Click(object sender, EventArgs e)
+        {
+            double Last_horizontaloAngle = 0;
+            double Last_verticalAngle = 0;
+            tableControl.sendCommond(tableControl.CalCulaTion(0, 0x4b, Convert.ToString((int)Last_horizontaloAngle / 256), Convert.ToString((int)Last_horizontaloAngle % 256)));
+            tableControl.sendCommond(tableControl.CalCulaTion(0, 0x4d, Convert.ToString((int)Last_verticalAngle / 256), Convert.ToString((int)Last_verticalAngle % 256)));
+        }
+
+        private void button7_Click(object sender, EventArgs e)
+        {
+            //获取设备旋转角
+            string PntCol = "A";
+            string PntGroup = "TEST";
+            string Pntname = "A1";
+
+            double r = 0;
+            double theta = 0;
+            double phi = 0;
+            Instrument selectedIns = (Instrument)comboBox_gnd.SelectedItem;
+            selectedIns.GetAngle(PntCol, PntGroup, Pntname, ref r, ref theta, ref phi);
+
+            tableControl.TableCon(theta, phi, r);
+            mpObj.SetWorkingFrame("A", "World");
         }
     }
-    
-
 }

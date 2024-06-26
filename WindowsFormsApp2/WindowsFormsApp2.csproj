@@ -33,7 +33,7 @@
     <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>x64</PlatformTarget>
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -193,7 +193,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="camera.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="camera.Designer.cs">
+      <DependentUpon>camera.cs</DependentUpon>
+    </Compile>
     <Compile Include="CLaserTracker.cs" />
+    <Compile Include="TableControl.cs" />
     <Compile Include="excel.cs" />
     <Compile Include="Locate.cs">
       <SubType>Form</SubType>
@@ -238,7 +245,22 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="UserControlTest1.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UserControlTest1.Designer.cs">
+      <DependentUpon>UserControlTest1.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UserControlTest2.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UserControlTest2.Designer.cs">
+      <DependentUpon>UserControlTest2.cs</DependentUpon>
+    </Compile>
     <Compile Include="word.cs" />
+    <EmbeddedResource Include="camera.resx">
+      <DependentUpon>camera.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Locate.resx">
       <DependentUpon>Locate.cs</DependentUpon>
     </EmbeddedResource>
@@ -261,6 +283,12 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <SubType>Designer</SubType>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UserControlTest1.resx">
+      <DependentUpon>UserControlTest1.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UserControlTest2.resx">
+      <DependentUpon>UserControlTest2.cs</DependentUpon>
     </EmbeddedResource>
     <None Include=".editorconfig" />
     <None Include="app.manifest" />

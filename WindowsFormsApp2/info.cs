@@ -6,6 +6,7 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -27,7 +28,11 @@ namespace WindowsFormsApp2
             InitializeComponent();
             //WindowState = FormWindowState.Maximized;
             opr_num.Text = login.opr_num;
-        }
+
+            Type dgvType = this.dataGridView1.GetType();
+            PropertyInfo pi = dgvType.GetProperty("DoubleBuffered", BindingFlags.Instance | BindingFlags.NonPublic);
+            pi.SetValue(this.dataGridView1, true, null);
+       }
 
         private void button1_Click(object sender, EventArgs e)
         {
@@ -136,20 +141,6 @@ namespace WindowsFormsApp2
             }
         }
 
-        private void btn_close_Click(object sender, EventArgs e)
-        {
-            this.Close();
-        }
-
-        private void btn_min_Click(object sender, EventArgs e)
-        {
-            WindowState = FormWindowState.Minimized;
-        }
-
-        private void btn_max_Click(object sender, EventArgs e)
-        {
-            WindowState = FormWindowState.Maximized;
-        }
 
         private void checkBox1_CheckedChanged(object sender, EventArgs e)
         {
@@ -171,7 +162,7 @@ namespace WindowsFormsApp2
             if (checkBox4.Checked) { checkBox4.ForeColor = SystemColors.ButtonHighlight; }
             if (!checkBox4.Checked) { checkBox4.ForeColor = SystemColors.ActiveBorder; }
         }
-                private void checkBox5_CheckedChanged(object sender, EventArgs e)
+        private void checkBox5_CheckedChanged(object sender, EventArgs e)
         {
             if (checkBox5.Checked) { checkBox5.ForeColor = SystemColors.ButtonHighlight; }
             if (!checkBox5.Checked) { checkBox5.ForeColor = SystemColors.ActiveBorder; }

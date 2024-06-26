@@ -1,1 +1,1 @@
-E:\桌面备份\项目文件\airplane_meansure_app_0504\WindowsFormsApp2\bin\Debug\test.xit64
+E:\airplane_meansure_app_0614\WindowsFormsApp2\bin\Debug\init.xit64

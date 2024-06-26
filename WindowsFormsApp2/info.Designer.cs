@@ -73,7 +73,7 @@
             this.eqp_num.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(204)))), ((int)(((byte)(221)))), ((int)(((byte)(220)))));
             this.eqp_num.Location = new System.Drawing.Point(170, 94);
             this.eqp_num.Name = "eqp_num";
-            this.eqp_num.Size = new System.Drawing.Size(228, 39);
+            this.eqp_num.Size = new System.Drawing.Size(228, 29);
             this.eqp_num.TabIndex = 1;
             // 
             // label3
@@ -85,7 +85,7 @@
             this.label3.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(177)))), ((int)(((byte)(191)))), ((int)(((byte)(192)))));
             this.label3.Location = new System.Drawing.Point(40, 97);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(124, 28);
+            this.label3.Size = new System.Drawing.Size(85, 19);
             this.label3.TabIndex = 6;
             this.label3.Text = "飞机编号";
             this.label3.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -125,7 +125,7 @@
             this.label2.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(177)))), ((int)(((byte)(191)))), ((int)(((byte)(192)))));
             this.label2.Location = new System.Drawing.Point(490, 97);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(68, 28);
+            this.label2.Size = new System.Drawing.Size(47, 19);
             this.label2.TabIndex = 14;
             this.label2.Text = "工号";
             this.label2.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -138,7 +138,7 @@
             this.opr_num.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(204)))), ((int)(((byte)(221)))), ((int)(((byte)(220)))));
             this.opr_num.Location = new System.Drawing.Point(587, 94);
             this.opr_num.Name = "opr_num";
-            this.opr_num.Size = new System.Drawing.Size(228, 39);
+            this.opr_num.Size = new System.Drawing.Size(228, 29);
             this.opr_num.TabIndex = 2;
             // 
             // button1
@@ -165,7 +165,7 @@
             this.checkBox5.ForeColor = System.Drawing.SystemColors.ActiveBorder;
             this.checkBox5.Location = new System.Drawing.Point(552, 221);
             this.checkBox5.Name = "checkBox5";
-            this.checkBox5.Size = new System.Drawing.Size(164, 32);
+            this.checkBox5.Size = new System.Drawing.Size(115, 23);
             this.checkBox5.TabIndex = 8;
             this.checkBox5.Text = "CNI子系统";
             this.checkBox5.UseVisualStyleBackColor = true;
@@ -179,7 +179,7 @@
             this.checkBox6.ForeColor = System.Drawing.SystemColors.ActiveBorder;
             this.checkBox6.Location = new System.Drawing.Point(552, 276);
             this.checkBox6.Name = "checkBox6";
-            this.checkBox6.Size = new System.Drawing.Size(234, 32);
+            this.checkBox6.Size = new System.Drawing.Size(161, 23);
             this.checkBox6.TabIndex = 9;
             this.checkBox6.Text = "惯性参考子系统";
             this.checkBox6.UseVisualStyleBackColor = true;
@@ -193,7 +193,7 @@
             this.checkBox7.ForeColor = System.Drawing.SystemColors.ActiveBorder;
             this.checkBox7.Location = new System.Drawing.Point(552, 331);
             this.checkBox7.Name = "checkBox7";
-            this.checkBox7.Size = new System.Drawing.Size(290, 32);
+            this.checkBox7.Size = new System.Drawing.Size(199, 23);
             this.checkBox7.TabIndex = 10;
             this.checkBox7.Text = "光电分布式孔径雷达";
             this.checkBox7.UseVisualStyleBackColor = true;
@@ -207,7 +207,7 @@
             this.checkBox1.ForeColor = System.Drawing.SystemColors.ActiveBorder;
             this.checkBox1.Location = new System.Drawing.Point(168, 170);
             this.checkBox1.Name = "checkBox1";
-            this.checkBox1.Size = new System.Drawing.Size(262, 32);
+            this.checkBox1.Size = new System.Drawing.Size(180, 23);
             this.checkBox1.TabIndex = 3;
             this.checkBox1.Text = "飞机水平位姿测量";
             this.checkBox1.UseVisualStyleBackColor = true;
@@ -221,7 +221,7 @@
             this.checkBox8.ForeColor = System.Drawing.SystemColors.ActiveBorder;
             this.checkBox8.Location = new System.Drawing.Point(552, 170);
             this.checkBox8.Name = "checkBox8";
-            this.checkBox8.Size = new System.Drawing.Size(150, 32);
+            this.checkBox8.Size = new System.Drawing.Size(104, 23);
             this.checkBox8.TabIndex = 7;
             this.checkBox8.Text = "雷达系统";
             this.checkBox8.UseVisualStyleBackColor = true;
@@ -235,7 +235,7 @@
             this.checkBox2.ForeColor = System.Drawing.SystemColors.ActiveBorder;
             this.checkBox2.Location = new System.Drawing.Point(168, 331);
             this.checkBox2.Name = "checkBox2";
-            this.checkBox2.Size = new System.Drawing.Size(150, 32);
+            this.checkBox2.Size = new System.Drawing.Size(104, 23);
             this.checkBox2.TabIndex = 6;
             this.checkBox2.Text = "飞控系统";
             this.checkBox2.UseVisualStyleBackColor = true;
@@ -249,7 +249,7 @@
             this.checkBox4.ForeColor = System.Drawing.SystemColors.ActiveBorder;
             this.checkBox4.Location = new System.Drawing.Point(168, 221);
             this.checkBox4.Name = "checkBox4";
-            this.checkBox4.Size = new System.Drawing.Size(178, 32);
+            this.checkBox4.Size = new System.Drawing.Size(123, 23);
             this.checkBox4.TabIndex = 4;
             this.checkBox4.Text = "电子战系统";
             this.checkBox4.UseVisualStyleBackColor = true;
@@ -263,7 +263,7 @@
             this.checkBox3.ForeColor = System.Drawing.SystemColors.ActiveBorder;
             this.checkBox3.Location = new System.Drawing.Point(168, 276);
             this.checkBox3.Name = "checkBox3";
-            this.checkBox3.Size = new System.Drawing.Size(290, 32);
+            this.checkBox3.Size = new System.Drawing.Size(199, 23);
             this.checkBox3.TabIndex = 5;
             this.checkBox3.Text = "座舱显示与控制系统";
             this.checkBox3.UseVisualStyleBackColor = true;
@@ -303,7 +303,7 @@
             this.textBox_selected_scan_path.Font = new System.Drawing.Font("宋体", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.textBox_selected_scan_path.Location = new System.Drawing.Point(278, 57);
             this.textBox_selected_scan_path.Name = "textBox_selected_scan_path";
-            this.textBox_selected_scan_path.Size = new System.Drawing.Size(598, 28);
+            this.textBox_selected_scan_path.Size = new System.Drawing.Size(598, 21);
             this.textBox_selected_scan_path.TabIndex = 12;
             this.textBox_selected_scan_path.Text = "E:\\C#_proj\\airplane_meansure_app\\WindowsFormsApp2\\history";
             // 
@@ -415,7 +415,7 @@
             this.label1.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(92)))), ((int)(((byte)(215)))), ((int)(((byte)(245)))));
             this.label1.Location = new System.Drawing.Point(28, 13);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(617, 40);
+            this.label1.Size = new System.Drawing.Size(417, 27);
             this.label1.TabIndex = 18;
             this.label1.Text = "激光雷达全机水平测量及校靶系统";
             // 
@@ -441,6 +441,7 @@
             this.Controls.Add(this.pictureBox2);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.groupBox1);
+            this.DoubleBuffered = true;
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.Fixed3D;
             this.Name = "info";
             this.groupBox1.ResumeLayout(false);

@@ -143,13 +143,13 @@ namespace MpLib
             if (tablocr != -1)
             {
                 colName = PntInfo.Substring(0, tablocr);
-                PntName = PntInfo.Substring(tablocr + 2, PntInfo.Count()-(tablocr + 2));
+                PntName = PntInfo.Substring(tablocr + 2, PntInfo.Count() - (tablocr + 2));
                 int tablocr2 = PntName.IndexOf(("::"));
                 if (tablocr2 != -1)
                 {
                     GrpName = PntName.Substring(0, tablocr2);
 
-                    PntName = PntName.Substring(tablocr2 + 2, PntName.Count()-(tablocr2 + 2));
+                    PntName = PntName.Substring(tablocr2 + 2, PntName.Count() - (tablocr2 + 2));
                 }
                 else
                 {
@@ -2466,20 +2466,14 @@ namespace MpLib
         }
 
 
-        //        public bool ConstructFrame()
-        //            {
-        //NrkSdk.SetStep("Construct Frame");
-        //	NrkSdk.SetCollectionObjectNameArg("New Frame Name", "", "");
-        //	double T[4][4];
-        //	T[0][0] = 1.000000; 	T[0][1] = 0.000000; 	T[0][2] = 0.000000; 	T[0][3] = 0.000000; 
-        //	T[1][0] = 0.000000; 	T[1][1] = 1.000000; 	T[1][2] = 0.000000; 	T[1][3] = 0.000000; 
-        //	T[2][0] = 0.000000; 	T[2][1] = 0.000000; 	T[2][2] = 1.000000; 	T[2][3] = 0.000000; 
-        //	T[3][0] = 0.000000; 	T[3][1] = 0.000000; 	T[3][2] = 0.000000; 	T[3][3] = 1.000000; 
-        //	SDKHelper helper(NrkSdk);
-        //        helper.SetTransformArgHelper("Transform in Working Coordinates", T);
-        //bool bExcuteStatus = NrkSdk.ExecuteStep();
-        //        return bExcuteStatus;
-        //}
+        public bool ConstructFrame(string _sCol, string _sName, double[,] _sTransform)
+        {
+            NrkSdk.SetStep("Construct Frame");
+            NrkSdk.SetCollectionObjectNameArg("New Frame Name", _sCol, _sName);
+            NrkSdk.SetTransformArg("Transform in Working Coordinates", _sTransform);
+            bool bExcuteStatus = NrkSdk.ExecuteStep();
+            return bExcuteStatus;
+        }
 
 
         public bool ConstructFrameOnInstrumentBase(string _sInsCollection, int _iInsID, string _sFrameName)
@@ -3196,7 +3190,7 @@ namespace MpLib
                     if (Ptlist != null)
                     {
                         // 现在可以安全地使用list了
-                        for (int i=0;i<Ptlist.Count();i++)
+                        for (int i = 0; i < Ptlist.Count(); i++)
                         {
                             _ptNameList.Add(Ptlist[i]);
                         }
@@ -3292,48 +3286,40 @@ namespace MpLib
         //            return bExcuteStatus;
         //        }
 
-        //        public bool MakeACollectionObjectNameFromStrings()
-        //        {
-        //            NrkSdk.SetStep("Make a Collection Object Name from Strings");
-        //            NrkSdk.SetStringArg("Collection", "");
-        //            NrkSdk.SetStringArg("Object", "");
-        //            // Available options: 
-        //            // "Any", "Circle", "Cloud", "Cone", "Curves", 
-        //            // "Cylinder", "Ellipse", "Frame", "Line", "Paraboloid", 
-        //            // "Perimeter", "Plane", "Point Group", "Poly Surface", "Sphere", 
-        //            // "Spline", "Surface", "Vector Group", 
-        //            NrkSdk.SetObjectTypeArg("Object Type", "");
-        //            bool bExcuteStatus = NrkSdk.ExecuteStep();
-        //            BSTR sCol = NULL;
-        //            BSTR sObj = NULL;
-        //            NrkSdk.GetCollectionObjectNameArg("Resultant Collection Object Name", &sCol, &sObj);
-        //            CString colName = sCol;
-        //            CString objName = sObj;
-        //::SysFreeString(sCol);
-        //::SysFreeString(sObj);
-        //            return bExcuteStatus;
-        //        }
+        public bool MakeACollectionObjectNameFromStrings(string sCol, string sObjName, string sObjType, ref string colName, ref string objName)
+        {
+            NrkSdk.SetStep("Make a Collection Object Name from Strings");
+            NrkSdk.SetStringArg("Collection", sCol);
+            NrkSdk.SetStringArg("Object", sObjName);
+            // Available options: 
+            // "Any", "Circle", "Cloud", "Cone", "Curves", 
+            // "Cylinder", "Ellipse", "Frame", "Line", "Paraboloid", 
+            // "Perimeter", "Plane", "Point Group", "Poly Surface", "Sphere", 
+            // "Spline", "Surface", "Vector Group", 
+            NrkSdk.SetObjectTypeArg("Object Type", sObjType);
+            bool bExcuteStatus = NrkSdk.ExecuteStep();
+            if (bExcuteStatus)
+            {
+                NrkSdk.GetCollectionObjectNameArg("Resultant Collection Object Name", ref colName, ref objName);
+            }
+            return bExcuteStatus;
+        }
 
-        //        public bool MakeACollectionObjectNameRuntimeSelect()
-        //        {
-        //            NrkSdk.SetStep("Make a Collection Object Name - Runtime Select");
-        //            NrkSdk.SetStringArg("User Prompt", "");
-        //            // Available options: 
-        //            // "Any", "Circle", "Cloud", "Cone", "Curves", 
-        //            // "Cylinder", "Ellipse", "Frame", "Line", "Paraboloid", 
-        //            // "Perimeter", "Plane", "Point Group", "Poly Surface", "Sphere", 
-        //            // "Spline", "Surface", "Vector Group", 
-        //            NrkSdk.SetObjectTypeArg("Object Type", "");
-        //            bool bExcuteStatus = NrkSdk.ExecuteStep();
-        //            BSTR sCol = NULL;
-        //            BSTR sObj = NULL;
-        //            NrkSdk.GetCollectionObjectNameArg("Resultant Collection Object Name", &sCol, &sObj);
-        //            CString colName = sCol;
-        //            CString objName = sObj;
-        //::SysFreeString(sCol);
-        //::SysFreeString(sObj);
-        //            return bExcuteStatus;
-        //        }
+        public bool MakeACollectionObjectNameRuntimeSelect(string Prompt, string ObjType, ref string sCol, ref string sObj)
+        {
+            NrkSdk.SetStep("Make a Collection Object Name - Runtime Select");
+            NrkSdk.SetStringArg("User Prompt", Prompt);
+            // Available options: 
+            // "Any", "Circle", "Cloud", "Cone", "Curves", 
+            // "Cylinder", "Ellipse", "Frame", "Line", "Paraboloid", 
+            // "Perimeter", "Plane", "Point Group", "Poly Surface", "Sphere", 
+            // "Spline", "Surface", "Vector Group", 
+            NrkSdk.SetObjectTypeArg("Object Type", ObjType);
+            bool bExcuteStatus = NrkSdk.ExecuteStep();
+
+            NrkSdk.GetCollectionObjectNameArg("Resultant Collection Object Name", ref sCol, ref sObj);
+            return bExcuteStatus;
+        }
 
         //public bool MakeACollectionObjectNameEnsureUnique()
         //{
@@ -3423,16 +3409,14 @@ namespace MpLib
         //    return bExcuteStatus;
         //}
 
-        //public bool AddACollectionObjectNameToARefList()
-        //{
-        //    NrkSdk.SetStep("Add a Collection Object Name to a Ref List");
-        //    CStringArray objNameList;
-        //    SDKHelper helper(NrkSdk);
-        //    helper.SetCollectionObjectNameRefListArgHelper("Collection Object Name List", objNameList);
-        //    NrkSdk.SetCollectionObjectNameArg("Collection Object To Add", "", "");
-        //    bool bExcuteStatus = NrkSdk.ExecuteStep();
-        //    return bExcuteStatus;
-        //}
+        public bool AddACollectionObjectNameToARefList(string argName, string scol, string objName, ref object _objNameList)
+        {
+            NrkSdk.SetStep("Add a Collection Object Name to a Ref List");
+            NrkSdk.SetCollectionObjectNameRefListArg("Collection Object Name List", ref _objNameList);
+            NrkSdk.SetCollectionObjectNameArg(argName, scol, objName);
+            bool bExcuteStatus = NrkSdk.ExecuteStep();
+            return bExcuteStatus;
+        }
 
         //public bool MakeACollectionObjectNameRefListFromAllGroupsInACollection()
         //{
@@ -4493,7 +4477,7 @@ namespace MpLib
             if (true == bExcuteStatus)
             {
                 Object vMatrix = null;
-                NrkSdk.GetWorldTransformArg("Optimum Transform", vMatrix, _dScale);
+                NrkSdk.GetWorldTransformArg("Optimum Transform", ref vMatrix, ref _dScale);
                 Array Amatrix = (Array)vMatrix;
 
                 for (int i = 0; i <= 3; i++)
@@ -4522,6 +4506,54 @@ namespace MpLib
             //DOUBLE value;
             //NrkSdk.GetDoubleArg("Maximum Absolute Deviation", &value); 
 
+            return bExcuteStatus;
+        }
+
+
+        public bool BestFitTransformationGrouptoGroup(string _RefCol, string _RefGroup, string _CorrespondingCol, string _CorrespondingGroup,
+            bool bShowInterface, double dRMS, double dAbsTol, ref double[,] _sTransform)
+        {
+            NrkSdk.SetStep("Best Fit Transformation - Group to Group");
+            NrkSdk.SetCollectionObjectNameArg("Reference Group", _RefCol, _RefGroup);
+            NrkSdk.SetCollectionObjectNameArg("Corresponding Group", _CorrespondingCol, _CorrespondingGroup);
+            NrkSdk.SetBoolArg("Show Interface", bShowInterface);
+            NrkSdk.SetDoubleArg("RMS Tolerance (0.0 for none)", dRMS);
+            NrkSdk.SetDoubleArg("Maximum Absolute Tolerance (0.0 for none)", dAbsTol);
+            NrkSdk.SetBoolArg("Allow Scale", false);
+            NrkSdk.SetBoolArg("Allow X", true);
+            NrkSdk.SetBoolArg("Allow Y", true);
+            NrkSdk.SetBoolArg("Allow Z", true);
+            NrkSdk.SetBoolArg("Allow Rx", true);
+            NrkSdk.SetBoolArg("Allow Ry", true);
+            NrkSdk.SetBoolArg("Allow Rz", true);
+            NrkSdk.SetFilePathArg("File Path for CSV Text Report (requires Show Interface = TRUE)", "", false);
+            bool bExcuteStatus = NrkSdk.ExecuteStep();
+            if (bExcuteStatus)
+            {
+                //double outScale;
+                Object vMatrix = null;
+                NrkSdk.GetTransformArg("Transform in Working", ref vMatrix);
+                Array Amatrix = (Array)vMatrix;
+
+                for (int i = 0; i <= 3; i++)
+                {
+                    for (int j = 0; j <= 3; j++)
+                    {
+                        double element;
+                        element = (double)Amatrix.GetValue(i, j);
+                        _sTransform[i, j] = element;
+                    }
+                }
+                //                double 
+                //NrkSdk.GetWorldTransformArg("Optimum Transform", ref Transform, ref  outScale);
+
+                //NrkSdk.GetDoubleArg("RMS Deviation", &value);
+
+                //        double AbsValue;
+                //NrkSdk.GetDoubleArg("Maximum Absolute Deviation", &AbsValue);
+
+                return true;
+            }
             return bExcuteStatus;
         }
 
@@ -5195,7 +5227,7 @@ namespace MpLib
         }
 
 
-        public bool GetPointCoordinate(string _pntCol, string _pntGroup,string _pntName,ref double _x,ref double _y,ref double _z)
+        public bool GetPointCoordinate(string _pntCol, string _pntGroup, string _pntName, ref double _x, ref double _y, ref double _z)
         {
             NrkSdk.SetStep("Get Point Coordinate");
             NrkSdk.SetPointNameArg("Point Name", _pntCol, _pntGroup, _pntName);
@@ -5209,22 +5241,49 @@ namespace MpLib
             return bExcuteStatus;
         }
 
-        //public bool GetWorkingFrameProperties()
-        //{
-        //    NrkSdk.SetStep("Get Working Frame Properties");
-        //    bool bExcuteStatus = NrkSdk.ExecuteStep();
-        //    BSTR sValue = NULL;
-        //    NrkSdk.GetStringArg("Frame Name", &sValue);
-        //    CString name = sValue;
-        //::SysFreeString(sValue);
+        public bool GetPointCoordinateCylindrical(string _sPntCol, string _sPntGrp, string _sPntName,
+            ref double _dRadius, ref double _dTheta, ref double _dZ)
+        {
+            NrkSdk.SetStep("Get Point Coordinate (Cylindrical)");
+            NrkSdk.SetPointNameArg("Point Name", _sPntCol, _sPntGrp, _sPntName);
+            bool bExcuteStatus = NrkSdk.ExecuteStep();
+            if (bExcuteStatus)
+            {
+                NrkSdk.GetDoubleArg("Radius Value", ref _dRadius);
+                NrkSdk.GetDoubleArg("Theta Value", ref _dTheta);
+                NrkSdk.GetDoubleArg("Z Value", ref _dZ);
 
-        //    BSTR sValue = NULL;
-        //    NrkSdk.GetStringArg("Collection Name", &sValue);
-        //    CString name = sValue;
-        //::SysFreeString(sValue);
+            }
+            return bExcuteStatus;
+        }
 
-        //    return bExcuteStatus;
-        //}
+        public bool GetPointCoordinatePolar(string _sPntCol, string _sPntGrp, string _sPntName,
+            ref double _dRadius, ref double _dTheta, ref double _dPhi)
+        {
+            NrkSdk.SetStep("Get Point Coordinate (Polar)");
+            NrkSdk.SetPointNameArg("Point Name", _sPntCol, _sPntGrp, _sPntName);
+            bool bExcuteStatus = NrkSdk.ExecuteStep();
+            if (bExcuteStatus)
+            {
+                NrkSdk.GetDoubleArg("Radius Value", ref _dRadius);
+                NrkSdk.GetDoubleArg("Theta Value", ref _dTheta);
+                NrkSdk.GetDoubleArg("Phi Value", ref _dPhi);
+            }
+            return bExcuteStatus;
+        }
+
+
+        public bool GetWorkingFrameProperties(ref string _sFrameCol, ref string _sFrameName)
+        {
+            NrkSdk.SetStep("Get Working Frame Properties");
+            bool bExcuteStatus = NrkSdk.ExecuteStep();
+            if (bExcuteStatus)
+            {
+                NrkSdk.GetStringArg("Collection Name", ref _sFrameCol);
+                NrkSdk.GetStringArg("Frame Name", ref _sFrameName);
+            }
+            return bExcuteStatus;
+        }
 
         public bool SetWorkingColor(byte _r, byte _g, byte _b)
         {
@@ -5496,15 +5555,13 @@ namespace MpLib
         //}
 
 
-        //public bool DeleteObjects()
-        //{
-        //    NrkSdk.SetStep("Delete Objects");
-        //    CStringArray objNameList;
-        //    SDKHelper helper(NrkSdk);
-        //    helper.SetCollectionObjectNameRefListArgHelper("Object Names", objNameList);
-        //    bool bExcuteStatus = NrkSdk.ExecuteStep();
-        //    return bExcuteStatus;
-        //}
+        public bool DeleteObjects(ref object _objNameList)
+        {
+            NrkSdk.SetStep("Delete Objects");
+            NrkSdk.SetCollectionObjectNameRefListArg("Object Names", _objNameList);
+            bool bExcuteStatus = NrkSdk.ExecuteStep();
+            return bExcuteStatus;
+        }
 
         //public bool HighlightObjects()
         //{
