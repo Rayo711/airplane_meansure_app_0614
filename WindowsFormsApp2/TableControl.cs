@@ -17,6 +17,7 @@ namespace WindowsFormsApp2
             //计算转台转角
             double dist = 0;
             double angleV = 0, angleH = 0;
+            double err_V = 0, err_H = 0;
             AngleCalcu(AngleV, AngleH, r, ref angleV, ref angleH);
             MessageBox.Show(AngleV.ToString());
             MessageBox.Show(AngleH.ToString());
@@ -27,10 +28,10 @@ namespace WindowsFormsApp2
 
             //传输转台指令
             //程序设置左右转动时，向左为负，比如向左转动45度，命令为-45。
-            double horizontaloAngle = 0;//接收左右转动数据，因为不知道需求，这里新建文本框进行传输，还要结合激光雷达距离进行角度换算
+            double horizontaloAngle = angleH + err_H;//接收左右转动数据
             horizontaloAngle = horizontaloAngle * 100;
             //MessageBox.Show(horizontaloAngle.ToString());
-            double verticalAngle = 20;//接收上下转动角度
+            double verticalAngle = angleV + err_V;//接收上下转动角度
                                           //double verticalAngle = 0;//激光测距仪垂直角度
             verticalAngle = verticalAngle * 100;
             //MessageBox.Show(verticalAngle.ToString());
@@ -67,8 +68,8 @@ namespace WindowsFormsApp2
         {
             double d_1 = 398; //设备左右间距
             double d_2 = 40;//设备前后间距
-            double leica_distance1 = 30; //激光点距离
-            double leica_degree = 25; //激光测距仪转角
+            double leica_distance1 = radium; //激光点距离
+            double leica_degree = AngleH; //激光测距仪转角
             double length = Math.Sqrt(Math.Pow(d_1, 2) + Math.Pow(d_2, 2));//设备中心斜间距
             double l_degree = Math.Atan(d_2 / d_1) * (180 / Math.PI);//补充角度
             double leica_Hdegree1 = 90 - l_degree - leica_degree;//激光雷达点所在三角形内角
@@ -81,8 +82,8 @@ namespace WindowsFormsApp2
             angleH = -(90 - z_Hdegree + l_degree);//转台水平所需旋转角度
                                                              //垂直
             double h = 300; //设备垂直高度
-            double leica_distance2 = 11; //激光点距离
-            double leica_Vdegree = 45; //激光测距仪转角
+            double leica_distance2 = radium; //激光点距离
+            double leica_Vdegree = angleV; //激光测距仪转角
             double leica_Vdegree1 = 180 - leica_Vdegree; //激光雷达点所在三角形内角
             double leicaRadians2 = leica_Vdegree1 * (Math.PI / 180);
             double cosleica2 = Math.Cos(leicaRadians2);

@@ -584,35 +584,43 @@ namespace WindowsFormsApp2
 
             mpObj.SetWorkingFrame("A", "WORLD");
             string RefCol = "A";
-            string RefGroup ="飞机基准点";
-            string CorrespondingCol ="A";
-            string CorrespondingGroup = "飞机测量点";
+            string RefGroup = "1";
+            string CorrespondingCol = "A";
+            string CorrespondingGroup = "2";
 
             bool bShowInterface = false;
             double dRMS = 0.0;
-            double dAbsTol = 0.0 ;
+            double dAbsTol = 0.0;
             double[,] sTransform = new double[4, 4];
 
             //计算转换矩阵
             mpObj.BestFitTransformationGrouptoGroup(RefCol, RefGroup, CorrespondingCol, CorrespondingGroup,
                 bShowInterface, dRMS, dAbsTol, ref sTransform);
 
-            ////构建之前先删除坐标系
-            //string colName = "";
-            //string ObjName = "";
-            //mpObj.MakeACollectionObjectNameFromStrings("A", "产品坐标系", "Frame",ref colName,ref ObjName);
+            //通过构建和删除产品坐标系，使测量数据转换到产品坐标系
+            mpObj.ConstructFrame("A", "产品坐标系", sTransform);
 
-            //object ObjList = null;
-            //mpObj.AddACollectionObjectNameToARefList("TempFrame", colName, ObjName, ref ObjList);
-            //mpObj.DeleteObjects(ref ObjList);
+            string[] sCol = new string[1];
+            string[] sObjName = new string[1];
+            int iNumber = 1;
+            object objNameList = new object();
 
+            sCol[0] = "A";
+            sObjName[0] = "产品坐标系";
 
+            mpObj.AddACollectionObjectNameToARefList(sCol, sObjName, iNumber, ref objNameList);
+
+            //构建之前先删除坐标系
+            mpObj.DeleteObjects(objNameList);
+
+            //mpObj.DeleteObject("A", "产品坐标系");
             //A::New::坐标系
             //转换矩阵转构建坐标系
-            mpObj.ConstructFrame("A", "飞机坐标系", sTransform);
+            mpObj.ConstructFrame("A", "产品坐标系", sTransform);
 
             //激活坐标系
-            mpObj.SetWorkingFrame("A", "飞机坐标系");
+            mpObj.SetWorkingFrame("A", "产品坐标系");
+            
 
 
         }
@@ -951,6 +959,7 @@ namespace WindowsFormsApp2
 
             tableControl.TableCon(theta, phi, r);
             mpObj.SetWorkingFrame("A", "World");
+            mpObj.DeleteObject(PntCol, "设备" + PntCol + comboBox_gnd.SelectedIndex.ToString());
         }
     }
 }

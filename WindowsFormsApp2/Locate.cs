@@ -20,9 +20,9 @@ namespace WindowsFormsApp2
         MpClass mpObj = Main.mpObj;
         BindingList<Instrument> mInsList;
         BindingList<Instrument> mConnectedInsList;
-        private string[] Ptnames;
-        string PtGroup_mean = null;
-        string PtGroup_theo = null;
+
+        string PtGroup_mean = "";
+        string PtGroup_theo = "";
 
         List<Point_cloud> pointDataList_loc = new List<Point_cloud> { };
         Vector3 zeros = new Vector3((float)0.0, (float)0.0, (float)0.0);
@@ -46,7 +46,7 @@ namespace WindowsFormsApp2
                 return;
             }
             //获取需要连接的仪器ID
-            int InsIDToConnect = 0;
+            int InsIDToConnect = comboBox_loc_dev_select.SelectedIndex;
 
             //测量数据
             double x = 0, y = 0, z = 0;
@@ -60,8 +60,9 @@ namespace WindowsFormsApp2
                     {
                         //如果已经有原点，删除原点
                         string[] listPntToDelete = new string[1];
-                        
-                        string point_0 = "A::" + PtGroup_mean + Ptnames[index];
+                        string _name = dataGridView_loc.Rows[index].Cells[0].ToString();
+
+                        string point_0 = "A::" + PtGroup_mean + "::" + _name;
                         //listPntToDelete[0] = "A::全机::P1";
                         listPntToDelete[0] = point_0;
                         mpObj.DeletePoints(listPntToDelete);
@@ -69,14 +70,15 @@ namespace WindowsFormsApp2
                         //测试
                         if (mInsList.ElementAt(InsIDToConnect).MeasureSinglePnt(point_0))
                         {
-                            MessageBox.Show("测量" + PtGroup_mean + Ptnames[index] + "成功！");
-                            mpObj.GetPointCoordinate("A", PtGroup_mean, Ptnames[index], ref x, ref y, ref z);
+                            MessageBox.Show("测量" + point_0 + "成功！");
+                            mpObj.GetPointCoordinate("A", PtGroup_mean, _name, ref x, ref y, ref z);
                             //TODO：把点信息显示到界面上
                             //pointDataList[ind].Set_mean((float)x, (float)y, (float)z);
+                            dataGridView_loc.Rows[index].Cells[2].Value = new Vector3((float)x, (float)y, (float)z);
                         }
                         else
                         {
-                            MessageBox.Show("测量" + PtGroup_mean + Ptnames[index] + "失败");
+                            MessageBox.Show("测量" + PtGroup_mean + _name + "失败");
                         }
                     }
                     else
@@ -108,6 +110,8 @@ namespace WindowsFormsApp2
 
             Prompt = TempCol + ("::") + TempGroupName;
             text_theo.Text = Prompt;
+            PtGroup_theo = TempGroupName;
+            PtGroup_mean = PtGroup_theo + "(测量)";
 
             //获取所选点组中各点信息
             mpObj.GetNumberOfPointsInGroup(TempCol, TempGroupName,ref theoNum);

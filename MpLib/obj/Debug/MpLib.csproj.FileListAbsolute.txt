@@ -144,3 +144,10 @@ E:\airplane_meansure_app_0614\MpLib\obj\Debug\MpLib.csproj.CoreCompileInputs.cac
 E:\airplane_meansure_app_0614\MpLib\obj\Debug\MpLib.csproj.Up2Date
 E:\airplane_meansure_app_0614\MpLib\obj\Debug\MpLib.dll
 E:\airplane_meansure_app_0614\MpLib\obj\Debug\MpLib.pdb
+E:\airplane_meansure_app\WindowsFormsApp2\bin\Debug\MpLib.dll
+E:\airplane_meansure_app\WindowsFormsApp2\bin\Debug\MpLib.pdb
+E:\airplane_meansure_app\MpLib\obj\Debug\MpLib.csproj.AssemblyReference.cache
+E:\airplane_meansure_app\MpLib\obj\Debug\MpLib.csproj.CoreCompileInputs.cache
+E:\airplane_meansure_app\MpLib\obj\Debug\MpLib.csproj.Up2Date
+E:\airplane_meansure_app\MpLib\obj\Debug\MpLib.dll
+E:\airplane_meansure_app\MpLib\obj\Debug\MpLib.pdb

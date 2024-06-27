@@ -3409,13 +3409,18 @@ namespace MpLib
         //    return bExcuteStatus;
         //}
 
-        public bool AddACollectionObjectNameToARefList(string argName, string scol, string objName, ref object _objNameList)
+        public bool AddACollectionObjectNameToARefList(string[] _sCol, string[] _sObjName, int _iNumber, ref object _objNameList)
         {
-            NrkSdk.SetStep("Add a Collection Object Name to a Ref List");
-            NrkSdk.SetCollectionObjectNameRefListArg("Collection Object Name List", ref _objNameList);
-            NrkSdk.SetCollectionObjectNameArg(argName, scol, objName);
-            bool bExcuteStatus = NrkSdk.ExecuteStep();
-            return bExcuteStatus;
+            object[] objNameList = new object[_iNumber];
+            for (int i = 0; i < _iNumber; i++)
+            {
+                string Name = _sCol[i] + "::" + _sObjName[i];
+                objNameList[i] = Name;
+            }
+
+            VariantWrapper Wrapperobj = new VariantWrapper(objNameList);
+            _objNameList = Wrapperobj;
+            return true;
         }
 
         //public bool MakeACollectionObjectNameRefListFromAllGroupsInACollection()
@@ -5555,10 +5560,23 @@ namespace MpLib
         //}
 
 
-        public bool DeleteObjects(ref object _objNameList)
+        public bool DeleteObject(string _Col, string _ObjName)
         {
             NrkSdk.SetStep("Delete Objects");
-            NrkSdk.SetCollectionObjectNameRefListArg("Object Names", _objNameList);
+            string objName = _Col + "::" + _ObjName;
+            object[] userObjectList = new object[1];
+            userObjectList[0] = objName;
+            VariantWrapper Wrapperobj = new VariantWrapper(userObjectList);
+            object NewList = Wrapperobj;
+            NrkSdk.SetCollectionObjectNameRefListArg("Object Names", NewList);
+            bool bExcuteStatus = NrkSdk.ExecuteStep();
+            return bExcuteStatus;
+        }
+
+        public bool DeleteObjects(object ObjList)
+        {
+            NrkSdk.SetStep("Delete Objects");
+            NrkSdk.SetCollectionObjectNameRefListArg("Object Names", ObjList);
             bool bExcuteStatus = NrkSdk.ExecuteStep();
             return bExcuteStatus;
         }

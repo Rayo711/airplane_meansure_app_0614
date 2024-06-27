@@ -631,18 +631,15 @@ namespace WindowsFormsApp2
                 double theta = 0;
                 double phi = 0;
                 Instrument selectedIns = (Instrument)plane_devselect.SelectedItem;
+                //获取旋转角
                 selectedIns.GetAngle(PntCol, PntGroup, Pntname, ref r, ref theta, ref phi);
-                ////删除坐标系
-                //string colName = "";
-                //string ObjName = "";
-                //mpObj.MakeACollectionObjectNameFromStrings("A", "设备A"+InsIDToConnect.ToString(), "Frame", ref colName, ref ObjName);
-
-                //object ObjList = null;
-                //mpObj.AddACollectionObjectNameToARefList("设备A0", colName, ObjName, ref ObjList);
-                //mpObj.DeleteObjects(ref ObjList);
-
+                //转台控制
                 tableControl.TableCon(theta,phi,r);
+                //设置工作坐标系为世界坐标系
                 mpObj.SetWorkingFrame("A","World");
+
+                //删除获取设备旋转角中建立的坐标系
+                mpObj.DeleteObject(PntCol, "设备" + PntCol + InsIDToConnect.ToString());
 
 
             }
