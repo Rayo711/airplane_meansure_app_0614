@@ -2466,15 +2466,26 @@ namespace MpLib
         }
 
 
+        //public bool ConstructFrame(string _sCol, string _sName, double[,] _sTransform)
+        //{
+        //    NrkSdk.SetStep("Construct Frame");
+        //    NrkSdk.SetCollectionObjectNameArg("New Frame Name", _sCol, _sName);
+        //    NrkSdk.SetTransformArg("Transform in Working Coordinates", _sTransform);
+        //    bool bExcuteStatus = NrkSdk.ExecuteStep();
+        //    return bExcuteStatus;
+        //}
+
+
         public bool ConstructFrame(string _sCol, string _sName, double[,] _sTransform)
         {
             NrkSdk.SetStep("Construct Frame");
             NrkSdk.SetCollectionObjectNameArg("New Frame Name", _sCol, _sName);
-            NrkSdk.SetTransformArg("Transform in Working Coordinates", _sTransform);
+
+            object vMatrixobj = new System.Runtime.InteropServices.VariantWrapper(_sTransform);
+            NrkSdk.SetTransformArg("Transform in Working Coordinates", vMatrixobj);
             bool bExcuteStatus = NrkSdk.ExecuteStep();
             return bExcuteStatus;
         }
-
 
         public bool ConstructFrameOnInstrumentBase(string _sInsCollection, int _iInsID, string _sFrameName)
         {

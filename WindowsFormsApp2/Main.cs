@@ -31,6 +31,10 @@ using MathNet.Numerics.LinearAlgebra;
 using iTextSharp.text;
 using SixLabors.ImageSharp;
 using System.Diagnostics;
+using System.CodeDom.Compiler;
+using iTextSharp.text.pdf;
+using NPOI.SS.Formula.Functions;
+using System.Timers;
 
 namespace WindowsFormsApp2
 {
@@ -41,9 +45,7 @@ namespace WindowsFormsApp2
         public string stime;
         public string etime;
         public bool video_flag = false;
-        private VideoCapture capture;
         public string step_textpath = Environment.CurrentDirectory.Replace("\\bin\\Debug", "") + "/operate_schedule/";
-        private bool fullScreenFlag1 = false;
         string Pts_plane_loc;//构建飞机坐标系的理论点组名
         public List<Point_cloud> pointDataList_PF = new List<Point_cloud> { };
         public List<Point_cloud> pointDataList_GND = new List<Point_cloud> { };
@@ -52,10 +54,11 @@ namespace WindowsFormsApp2
         TableControl tableControl = new TableControl();
         private int index_gnd = 0;
         private int num_gnd = 6;
-
-
-        //相机画面参数
-        private System.Drawing.Size pic_size;
+        public bool Ins_connected = false;
+        //public static Action Print_Action;//声明事件
+        //public System.Timers.Timer tmr;
+        private BackgroundWorker backgroundWorker;
+        private int counter = 0; // 计数器变量
 
         public Main()
         {
@@ -74,12 +77,101 @@ namespace WindowsFormsApp2
             comboBox_gnd.DisplayMember = "Name";
             comboBox_gnd.ValueMember = "InsID";
 
-
+            tableControl.tab_connect();
             mean_process.Text = info.doc_text;
 
             Process.Start(@"E:\table\USR-VCOM.exe");  //直接调用打开文件
+            //tmr = new System.Timers.Timer();
+            //tmr.Elapsed += new System.Timers.ElapsedEventHandler(RotateTable);
+            //tmr.Interval = 2000;
+            //tmr.AutoReset = true; //true-一直循环 ，false-循环一次   
+            //tmr.SynchronizingObject = this; //运行在主线程上
+            //tmr.Enabled = false;
+            backgroundWorker = new BackgroundWorker();
+            backgroundWorker.WorkerReportsProgress = true;
+            backgroundWorker.DoWork += BackgroundWorker_DoWork;
+            backgroundWorker.WorkerSupportsCancellation = true;
+
 
         }
+        private void BackgroundWorker_DoWork(object sender, DoWorkEventArgs e)
+        {
+            // 无限循环，直到取消
+            while (!backgroundWorker.CancellationPending)
+            {
+                // 模拟耗时操作
+                System.Threading.Thread.Sleep(500);
+
+                RotateTable();
+
+                if (backgroundWorker.CancellationPending)
+                {
+                    e.Cancel = true; // 设置取消标志
+                    break; // 退出循环
+                }
+            }
+        }
+
+        public void RotateTable()
+        {
+            //Stopwatch stopwatch = Stopwatch.StartNew();
+
+            //测量单个点
+            //tmr.Stop();
+            if (null == mpObj)
+            {
+                MessageBox.Show("未连接仪器！");
+                return;
+            }
+            //获取需要连接的仪器ID
+            int InsIDToConnect = 0;
+            double r = 0;
+            double theta = 0;
+            double phi = 0;
+
+            if (mInsList.Count() > InsIDToConnect)
+            {
+                if (mInsList.ElementAt(InsIDToConnect).Connected)
+                {
+                    //如果已经有点，删除点
+                    string[] listPntToDelete = new string[2];
+                    listPntToDelete[0] = "A::Angle::A1";
+                    mpObj.DeletePoints(listPntToDelete);
+
+                    //测试
+                    if (mInsList.ElementAt(InsIDToConnect).MeasureSinglePnt("A::Angle::A1"))
+                    {
+
+                        Instrument selectedIns = (Instrument)comboBox_gnd.SelectedItem;
+                        //获取旋转角
+                        selectedIns.GetAngle("A", "Angle", "A1", ref r, ref theta, ref phi);
+                        //转台控制
+                        tableControl.TableCon(phi, theta, r);
+                        //设置工作坐标系为世界坐标系
+                        mpObj.SetWorkingFrame("A", "World");
+
+                        //删除获取设备旋转角中建立的坐标系
+                        mpObj.DeleteObject("A", "设备" + "A" + InsIDToConnect.ToString());
+                        Console.WriteLine("正在进行角度获取");
+                    }
+                    else
+                    {
+                        MessageBox.Show("获取激光雷达旋转角失败");
+                    }
+                }
+
+            }
+            else
+            {
+                MessageBox.Show("仪器号码过大，系统中没有添加该仪器！");
+            }
+            //tmr.Start();
+            //stopwatch.Stop();
+            //Console.WriteLine($"Execution time: {stopwatch.ElapsedMilliseconds} ms");
+
+
+        }
+
 
         //飞机基准点测量
         private void btn_plane_Click(object sender, EventArgs e)
@@ -398,10 +490,11 @@ namespace WindowsFormsApp2
                 if (mInsList.Count() > InsIDToConnect)
                 {
                     //测试
-                    if (mInsList.ElementAt(InsIDToConnect).StartIns("A", InsIDToConnect, true, "192.168.0.1", true))
+                    if (mInsList.ElementAt(InsIDToConnect).StartIns("A", InsIDToConnect, true, "192.168.0.1", false))
                     {
                         mInsList.ElementAt(InsIDToConnect).Connected = true;
                         mConnectedInsList.Add(mInsList.ElementAt(InsIDToConnect));
+                        Ins_connected = true;
                         MessageBox.Show("连接仪器成功！");
                     }
                 }
@@ -584,9 +677,9 @@ namespace WindowsFormsApp2
 
             mpObj.SetWorkingFrame("A", "WORLD");
             string RefCol = "A";
-            string RefGroup = "1";
+            string RefGroup = "飞机测量点";
             string CorrespondingCol = "A";
-            string CorrespondingGroup = "2";
+            string CorrespondingGroup = "飞机基准点";
 
             bool bShowInterface = false;
             double dRMS = 0.0;
@@ -598,7 +691,7 @@ namespace WindowsFormsApp2
                 bShowInterface, dRMS, dAbsTol, ref sTransform);
 
             //通过构建和删除产品坐标系，使测量数据转换到产品坐标系
-            mpObj.ConstructFrame("A", "产品坐标系", sTransform);
+            mpObj.ConstructFrame("A", "飞机坐标系", sTransform);
 
             string[] sCol = new string[1];
             string[] sObjName = new string[1];
@@ -606,7 +699,7 @@ namespace WindowsFormsApp2
             object objNameList = new object();
 
             sCol[0] = "A";
-            sObjName[0] = "产品坐标系";
+            sObjName[0] = "飞机坐标系";
 
             mpObj.AddACollectionObjectNameToARefList(sCol, sObjName, iNumber, ref objNameList);
 
@@ -616,10 +709,13 @@ namespace WindowsFormsApp2
             //mpObj.DeleteObject("A", "产品坐标系");
             //A::New::坐标系
             //转换矩阵转构建坐标系
-            mpObj.ConstructFrame("A", "产品坐标系", sTransform);
+            if (mpObj.ConstructFrame("A", "飞机坐标系", sTransform))
+            {
+                MessageBox.Show("飞机坐标系构建成功，请继续测量。");
+            }
 
             //激活坐标系
-            mpObj.SetWorkingFrame("A", "产品坐标系");
+            mpObj.SetWorkingFrame("A", "飞机坐标系");
             
 
 
@@ -769,7 +865,6 @@ namespace WindowsFormsApp2
           true, 0.0, 0.0, ref sTransform, ref dScale))
             {
                 //调用该函数后，软件弹出转站对话框，本软件会弹出等待的对话框，该对话框无法被关闭。只有当SA软件操作结束后，本软件弹出的等待对话框才能被关闭；
-                MessageBox.Show("请在SA完成转站操作后关闭本窗口");
             }
         } 
 
@@ -815,7 +910,10 @@ namespace WindowsFormsApp2
         //连接转台
         private void btn_table_connect_Click(object sender, EventArgs e)
         {
-            tableControl.tab_connect();
+            if (!backgroundWorker.IsBusy)
+            {
+                backgroundWorker.RunWorkerAsync();
+            }
         }
 
         //测量角可视化
@@ -938,6 +1036,11 @@ namespace WindowsFormsApp2
 
         private void button6_Click(object sender, EventArgs e)
         {
+            //tmr.Stop();
+            if (backgroundWorker.WorkerSupportsCancellation && backgroundWorker.IsBusy)
+            {
+                backgroundWorker.CancelAsync();
+            }
             double Last_horizontaloAngle = 0;
             double Last_verticalAngle = 0;
             tableControl.sendCommond(tableControl.CalCulaTion(0, 0x4b, Convert.ToString((int)Last_horizontaloAngle / 256), Convert.ToString((int)Last_horizontaloAngle % 256)));
@@ -946,20 +1049,53 @@ namespace WindowsFormsApp2
 
         private void button7_Click(object sender, EventArgs e)
         {
-            //获取设备旋转角
-            string PntCol = "A";
-            string PntGroup = "TEST";
-            string Pntname = "A1";
-
+            if (null == mpObj)
+            {
+                MessageBox.Show("未连接仪器！");
+                return;
+            }
+            //获取需要连接的仪器ID
+            int InsIDToConnect = 0;
             double r = 0;
             double theta = 0;
             double phi = 0;
-            Instrument selectedIns = (Instrument)comboBox_gnd.SelectedItem;
-            selectedIns.GetAngle(PntCol, PntGroup, Pntname, ref r, ref theta, ref phi);
 
-            tableControl.TableCon(theta, phi, r);
-            mpObj.SetWorkingFrame("A", "World");
-            mpObj.DeleteObject(PntCol, "设备" + PntCol + comboBox_gnd.SelectedIndex.ToString());
+            if (mInsList.Count() > InsIDToConnect)
+            {
+                if (mInsList.ElementAt(InsIDToConnect).Connected)
+                {
+                    //如果已经有点，删除点
+                    string[] listPntToDelete = new string[2];
+                    listPntToDelete[0] = "A::Angle::A1";
+                    mpObj.DeletePoints(listPntToDelete);
+
+                    //测试
+                    if (mInsList.ElementAt(InsIDToConnect).MeasureSinglePnt("A::Angle::A1"))
+                    {
+
+                        Instrument selectedIns = (Instrument)comboBox_gnd.SelectedItem;
+                        //获取旋转角
+                        selectedIns.GetAngle("A", "Angle", "A1", ref r, ref theta, ref phi);
+                        //转台控制
+                        tableControl.TableCon(phi, theta, r);
+                        //设置工作坐标系为世界坐标系
+                        mpObj.SetWorkingFrame("A", "World");
+
+                        //删除获取设备旋转角中建立的坐标系
+                        mpObj.DeleteObject("A", "设备" + "A" + InsIDToConnect.ToString());
+                    }
+                    else
+                    {
+                        MessageBox.Show("获取激光雷达旋转角失败");
+                    }
+                }
+
+            }
+            else
+            {
+                MessageBox.Show("仪器号码过大，系统中没有添加该仪器！");
+            }
         }
+
     }
 }

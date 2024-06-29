@@ -59,7 +59,7 @@ namespace WindowsFormsApp2
             NUM135500_SUB_Y_SUB_NUM135500_SUB_Y,
             Z_SUB_Z_SUB_Z_SUB_Z,
         }
-        private readonly IEnumerable<dynamic> measurements1, measurements2, measurements3, measurements4, measurements5, measurements6, measurements7, measurements8;
+        private readonly IEnumerable<dynamic> measurements1, measurements2, measurements3, measurements4, measurements5, measurements6, measurements7;
 
         public Plane(BindingList<Instrument> _mInsList, BindingList<Instrument> _mConnectedInsList)
         {

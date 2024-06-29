@@ -135,6 +135,7 @@ namespace WindowsFormsApp2
             {
                 doc_path = string.Join("/",this.textBox_selected_scan_path.Text, this.dataGridView1.Rows[index].Cells[1].Value);
                 doc_name = (string)this.dataGridView1.Rows[index].Cells[1].Value;
+                //System.Diagnostics.Process.Start(doc_path);
                 info_flag = 1;
                 History history = new History();
                 history.ShowDialog();

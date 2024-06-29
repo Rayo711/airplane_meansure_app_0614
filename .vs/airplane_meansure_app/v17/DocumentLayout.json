@@ -3,11 +3,11 @@
   "WorkspaceRootPath": "E:\\airplane_meansure_app\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{0A1D65E5-7B31-4861-B2A0-EFFBB16322D9}|WindowsFormsApp2\\WindowsFormsApp2.csproj|e:\\airplane_meansure_app\\windowsformsapp2\\locate.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{0A1D65E5-7B31-4861-B2A0-EFFBB16322D9}|WindowsFormsApp2\\WindowsFormsApp2.csproj|solutionrelative:windowsformsapp2\\locate.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{0A1D65E5-7B31-4861-B2A0-EFFBB16322D9}|WindowsFormsApp2\\WindowsFormsApp2.csproj|E:\\airplane_meansure_app\\windowsformsapp2\\tablecontrol.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0A1D65E5-7B31-4861-B2A0-EFFBB16322D9}|WindowsFormsApp2\\WindowsFormsApp2.csproj|solutionrelative:windowsformsapp2\\tablecontrol.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{0A1D65E5-7B31-4861-B2A0-EFFBB16322D9}|WindowsFormsApp2\\WindowsFormsApp2.csproj|E:\\airplane_meansure_app\\windowsformsapp2\\main.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{0A1D65E5-7B31-4861-B2A0-EFFBB16322D9}|WindowsFormsApp2\\WindowsFormsApp2.csproj|e:\\airplane_meansure_app\\windowsformsapp2\\main.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{0A1D65E5-7B31-4861-B2A0-EFFBB16322D9}|WindowsFormsApp2\\WindowsFormsApp2.csproj|solutionrelative:windowsformsapp2\\main.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
@@ -15,16 +15,24 @@
       "RelativeMoniker": "D:0:0:{0A1D65E5-7B31-4861-B2A0-EFFBB16322D9}|WindowsFormsApp2\\WindowsFormsApp2.csproj|solutionrelative:windowsformsapp2\\main.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{0A1D65E5-7B31-4861-B2A0-EFFBB16322D9}|WindowsFormsApp2\\WindowsFormsApp2.csproj|E:\\airplane_meansure_app\\windowsformsapp2\\locate.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
-      "RelativeMoniker": "D:0:0:{0A1D65E5-7B31-4861-B2A0-EFFBB16322D9}|WindowsFormsApp2\\WindowsFormsApp2.csproj|solutionrelative:windowsformsapp2\\locate.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
+      "AbsoluteMoniker": "D:0:0:{0A1D65E5-7B31-4861-B2A0-EFFBB16322D9}|WindowsFormsApp2\\WindowsFormsApp2.csproj|e:\\airplane_meansure_app\\windowsformsapp2\\main.designer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0A1D65E5-7B31-4861-B2A0-EFFBB16322D9}|WindowsFormsApp2\\WindowsFormsApp2.csproj|solutionrelative:windowsformsapp2\\main.designer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{0A1D65E5-7B31-4861-B2A0-EFFBB16322D9}|WindowsFormsApp2\\WindowsFormsApp2.csproj|E:\\airplane_meansure_app\\windowsformsapp2\\plane.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
-      "RelativeMoniker": "D:0:0:{0A1D65E5-7B31-4861-B2A0-EFFBB16322D9}|WindowsFormsApp2\\WindowsFormsApp2.csproj|solutionrelative:windowsformsapp2\\plane.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
+      "AbsoluteMoniker": "D:0:0:{0A1D65E5-7B31-4861-B2A0-EFFBB16322D9}|WindowsFormsApp2\\WindowsFormsApp2.csproj|E:\\airplane_meansure_app\\windowsformsapp2\\camera.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0A1D65E5-7B31-4861-B2A0-EFFBB16322D9}|WindowsFormsApp2\\WindowsFormsApp2.csproj|solutionrelative:windowsformsapp2\\camera.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0A1D65E5-7B31-4861-B2A0-EFFBB16322D9}|WindowsFormsApp2\\WindowsFormsApp2.csproj|E:\\airplane_meansure_app\\windowsformsapp2\\camera.designer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0A1D65E5-7B31-4861-B2A0-EFFBB16322D9}|WindowsFormsApp2\\WindowsFormsApp2.csproj|solutionrelative:windowsformsapp2\\camera.designer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{0A1D65E5-7B31-4861-B2A0-EFFBB16322D9}|WindowsFormsApp2\\WindowsFormsApp2.csproj|E:\\airplane_meansure_app\\windowsformsapp2\\plane.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{0A1D65E5-7B31-4861-B2A0-EFFBB16322D9}|WindowsFormsApp2\\WindowsFormsApp2.csproj|solutionrelative:windowsformsapp2\\plane.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0A1D65E5-7B31-4861-B2A0-EFFBB16322D9}|WindowsFormsApp2\\WindowsFormsApp2.csproj|E:\\airplane_meansure_app\\windowsformsapp2\\plane.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "RelativeMoniker": "D:0:0:{0A1D65E5-7B31-4861-B2A0-EFFBB16322D9}|WindowsFormsApp2\\WindowsFormsApp2.csproj|solutionrelative:windowsformsapp2\\plane.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
     }
   ],
   "DocumentGroupContainers": [
@@ -38,13 +46,13 @@
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 6,
               "Title": "Plane.cs",
               "DocumentMoniker": "E:\\airplane_meansure_app\\WindowsFormsApp2\\Plane.cs",
               "RelativeDocumentMoniker": "WindowsFormsApp2\\Plane.cs",
               "ToolTip": "E:\\airplane_meansure_app\\WindowsFormsApp2\\Plane.cs",
               "RelativeToolTip": "WindowsFormsApp2\\Plane.cs",
-              "ViewState": "AQIAAG0CAAAAAAAAAAAAAHoCAAAWAAAA",
+              "ViewState": "AQIAAPMAAAAAAAAAAAAEwHYCAAAhAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-06-25T08:57:17.871Z",
               "IsPinned": true
@@ -57,10 +65,11 @@
               "RelativeDocumentMoniker": "WindowsFormsApp2\\Main.cs",
               "ToolTip": "E:\\airplane_meansure_app\\WindowsFormsApp2\\Main.cs",
               "RelativeToolTip": "WindowsFormsApp2\\Main.cs",
-              "ViewState": "AQIAAFgAAAAAAAAAAAAiwHIAAABuAAAA",
+              "ViewState": "AQIAAP4DAAAAAAAAAAAAABIEAAANAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-06-18T07:48:29.26Z",
-              "IsPinned": true
+              "IsPinned": true,
+              "EditorCaption": ""
             },
             {
               "$type": "Bookmark",
@@ -77,37 +86,27 @@
             {
               "$type": "Document",
               "DocumentIndex": 0,
-              "Title": "Locate.cs",
-              "DocumentMoniker": "E:\\airplane_meansure_app\\WindowsFormsApp2\\Locate.cs",
-              "RelativeDocumentMoniker": "WindowsFormsApp2\\Locate.cs",
-              "ToolTip": "E:\\airplane_meansure_app\\WindowsFormsApp2\\Locate.cs",
-              "RelativeToolTip": "WindowsFormsApp2\\Locate.cs",
-              "ViewState": "AQIAACoAAAAAAAAAAAAAAEwAAAApAAAA",
+              "Title": "TableControl.cs",
+              "DocumentMoniker": "E:\\airplane_meansure_app\\WindowsFormsApp2\\TableControl.cs",
+              "RelativeDocumentMoniker": "WindowsFormsApp2\\TableControl.cs",
+              "ToolTip": "E:\\airplane_meansure_app\\WindowsFormsApp2\\TableControl.cs",
+              "RelativeToolTip": "WindowsFormsApp2\\TableControl.cs",
+              "ViewState": "AQIAAAUAAAAAAAAAAAAYwBIAAAAcAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-06-27T03:01:38.659Z",
+              "WhenOpened": "2024-06-28T03:29:17.294Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "Locate.cs [\u8BBE\u8BA1]",
-              "DocumentMoniker": "E:\\airplane_meansure_app\\WindowsFormsApp2\\Locate.cs",
-              "RelativeDocumentMoniker": "WindowsFormsApp2\\Locate.cs",
-              "ToolTip": "E:\\airplane_meansure_app\\WindowsFormsApp2\\Locate.cs [\u8BBE\u8BA1]",
-              "RelativeToolTip": "WindowsFormsApp2\\Locate.cs [\u8BBE\u8BA1]",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-06-27T03:01:37.306Z"
-            },
-            {
-              "$type": "Document",
               "DocumentIndex": 4,
-              "Title": "Plane.cs [\u8BBE\u8BA1]",
-              "DocumentMoniker": "E:\\airplane_meansure_app\\WindowsFormsApp2\\Plane.cs",
-              "RelativeDocumentMoniker": "WindowsFormsApp2\\Plane.cs",
-              "ToolTip": "E:\\airplane_meansure_app\\WindowsFormsApp2\\Plane.cs [\u8BBE\u8BA1]",
-              "RelativeToolTip": "WindowsFormsApp2\\Plane.cs [\u8BBE\u8BA1]",
+              "Title": "camera.cs",
+              "DocumentMoniker": "E:\\airplane_meansure_app\\WindowsFormsApp2\\camera.cs",
+              "RelativeDocumentMoniker": "WindowsFormsApp2\\camera.cs",
+              "ToolTip": "E:\\airplane_meansure_app\\WindowsFormsApp2\\camera.cs",
+              "RelativeToolTip": "WindowsFormsApp2\\camera.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAABUAAAAtAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-06-27T03:00:20.984Z"
+              "WhenOpened": "2024-06-28T03:29:02.978Z"
             },
             {
               "$type": "Document",
@@ -118,7 +117,44 @@
               "ToolTip": "E:\\airplane_meansure_app\\WindowsFormsApp2\\Main.cs [\u8BBE\u8BA1]",
               "RelativeToolTip": "WindowsFormsApp2\\Main.cs [\u8BBE\u8BA1]",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-06-18T08:00:24.092Z"
+              "WhenOpened": "2024-06-18T08:00:24.092Z",
+              "EditorCaption": " [\u8BBE\u8BA1]"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "camera.Designer.cs",
+              "DocumentMoniker": "E:\\airplane_meansure_app\\WindowsFormsApp2\\camera.Designer.cs",
+              "RelativeDocumentMoniker": "WindowsFormsApp2\\camera.Designer.cs",
+              "ToolTip": "E:\\airplane_meansure_app\\WindowsFormsApp2\\camera.Designer.cs",
+              "RelativeToolTip": "WindowsFormsApp2\\camera.Designer.cs",
+              "ViewState": "AQIAABsAAAAAAAAAAAAAACoAAABzAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-06-28T03:32:30.755Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "Plane.cs [\u8BBE\u8BA1]",
+              "DocumentMoniker": "E:\\airplane_meansure_app\\WindowsFormsApp2\\Plane.cs",
+              "RelativeDocumentMoniker": "WindowsFormsApp2\\Plane.cs",
+              "ToolTip": "E:\\airplane_meansure_app\\WindowsFormsApp2\\Plane.cs [\u8BBE\u8BA1]",
+              "RelativeToolTip": "WindowsFormsApp2\\Plane.cs [\u8BBE\u8BA1]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-06-27T08:38:51.941Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "Main.Designer.cs",
+              "DocumentMoniker": "E:\\airplane_meansure_app\\WindowsFormsApp2\\Main.Designer.cs",
+              "RelativeDocumentMoniker": "WindowsFormsApp2\\Main.Designer.cs",
+              "ToolTip": "E:\\airplane_meansure_app\\WindowsFormsApp2\\Main.Designer.cs",
+              "RelativeToolTip": "WindowsFormsApp2\\Main.Designer.cs",
+              "ViewState": "AQIAAEsOAAAAAAAAAAAAAFgOAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-06-29T07:43:11.966Z",
+              "EditorCaption": ""
             }
           ]
         }

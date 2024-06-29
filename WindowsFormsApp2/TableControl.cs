@@ -15,14 +15,14 @@ namespace WindowsFormsApp2
         public void TableCon(double AngleV, double AngleH, double r)
         {
             //计算转台转角
-            double dist = 0;
             double angleV = 0, angleH = 0;
-            double err_V = 0, err_H = 0;
+            double err_V = 8, err_H = -5;
             AngleCalcu(AngleV, AngleH, r, ref angleV, ref angleH);
-            MessageBox.Show(AngleV.ToString());
-            MessageBox.Show(AngleH.ToString());
-            MessageBox.Show(angleV.ToString());
-            MessageBox.Show(angleH.ToString());
+            Console.WriteLine($"AngleV: {AngleV}, AngleH: {AngleH}, angleV: {angleV}, angleH: {angleH}");
+            //MessageBox.Show(AngleV.ToString());
+            //MessageBox.Show(AngleH.ToString());
+            //MessageBox.Show(angleV.ToString());
+            //MessageBox.Show(angleH.ToString());
 
 
 
@@ -39,28 +39,29 @@ namespace WindowsFormsApp2
             if ((horizontaloAngle >= -6500 && horizontaloAngle <= 6500) && (verticalAngle > -4000 && verticalAngle <= 9000))
             {
                if (horizontaloAngle >= -6500 && horizontaloAngle <= 0)
-                    {
-                        horizontaloAngle = horizontaloAngle + 36000;
-                        sendCommond(CalCulaTion(0, 0x4b, Convert.ToString((int)horizontaloAngle / 256), Convert.ToString((int)horizontaloAngle % 256)));
-                    }
-                    else
-                    {
-                        sendCommond(CalCulaTion(0, 0x4b, Convert.ToString((int)horizontaloAngle / 256), Convert.ToString((int)horizontaloAngle % 256)));
+               {
+                    horizontaloAngle = horizontaloAngle + 36000;
+                    sendCommond(CalCulaTion(0, 0x4b, Convert.ToString((int)horizontaloAngle / 256), Convert.ToString((int)horizontaloAngle % 256)));
+               }
+               else
+               {
+                    sendCommond(CalCulaTion(0, 0x4b, Convert.ToString((int)horizontaloAngle / 256), Convert.ToString((int)horizontaloAngle % 256)));
 
-                    }
-               if (verticalAngle > -4000 && verticalAngle <= 0)
-                    {
-                        sendCommond(CalCulaTion(0, 0x4d, Convert.ToString((int)verticalAngle / 256), Convert.ToString((int)verticalAngle % 256)));
+               }
+            if (verticalAngle > -4000 && verticalAngle <= 0)
+               {
+                    verticalAngle = verticalAngle + 36000;
+                    sendCommond(CalCulaTion(0, 0x4d, Convert.ToString((int)verticalAngle / 256), Convert.ToString((int)verticalAngle % 256)));
 
-                    }
-                    else
-                    {
-                        sendCommond(CalCulaTion(0, 0x4d, Convert.ToString((int)verticalAngle / 256), Convert.ToString((int)verticalAngle % 256)));
-                    }
-                }                                
+               }
+               else
+               {
+                    sendCommond(CalCulaTion(0, 0x4d, Convert.ToString((int)verticalAngle / 256), Convert.ToString((int)verticalAngle % 256)));
+               }
+            }                                
             else
             {
-                MessageBox.Show("角度超出限制", "提示");
+                Console.WriteLine("角度超出范围");
             }
         }
 
@@ -69,7 +70,7 @@ namespace WindowsFormsApp2
             double d_1 = 398; //设备左右间距
             double d_2 = 40;//设备前后间距
             double leica_distance1 = radium; //激光点距离
-            double leica_degree = AngleH; //激光测距仪转角
+            double leica_degree = -AngleH; //激光测距仪转角
             double length = Math.Sqrt(Math.Pow(d_1, 2) + Math.Pow(d_2, 2));//设备中心斜间距
             double l_degree = Math.Atan(d_2 / d_1) * (180 / Math.PI);//补充角度
             double leica_Hdegree1 = 90 - l_degree - leica_degree;//激光雷达点所在三角形内角
@@ -81,9 +82,9 @@ namespace WindowsFormsApp2
             double z_Hdegree = 180 - alphaInDegrees1 - leica_Hdegree1;//转台点所在三角形的内角
             angleH = -(90 - z_Hdegree + l_degree);//转台水平所需旋转角度
                                                              //垂直
-            double h = 300; //设备垂直高度
+            double h = 200; //设备垂直高度
             double leica_distance2 = radium; //激光点距离
-            double leica_Vdegree = angleV; //激光测距仪转角
+            double leica_Vdegree = AngleV; //激光测距仪转角
             double leica_Vdegree1 = 180 - leica_Vdegree; //激光雷达点所在三角形内角
             double leicaRadians2 = leica_Vdegree1 * (Math.PI / 180);
             double cosleica2 = Math.Cos(leicaRadians2);
@@ -186,7 +187,7 @@ namespace WindowsFormsApp2
                 serialPort2.Open();//打开串口
                 if (serialPort2.IsOpen)
                 {
-                    MessageBox.Show("连接成功", "提示");
+                    MessageBox.Show("转台连接成功", "提示");
                 }
                 else
                 {

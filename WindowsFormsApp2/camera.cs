@@ -20,10 +20,6 @@ namespace WindowsFormsApp2
         public bool video_flag = false;
         private VideoCapture capture;
         private bool fullScreenFlag1 = false;
-        //相机画面参数
-        private double ratio = 1;        // 图片的起始显示比例
-        private double ratioStep = 0.1;
-        private System.Drawing.Size pic_size;
         public camera()
         {
             InitializeComponent();
@@ -46,7 +42,6 @@ namespace WindowsFormsApp2
         {
             Mat frame = new Mat();
             Mat new_frame = new Mat();
-            int LineLength = 20;
             Scalar color = new Scalar(0,0,255);
             while (video_flag)
             {
